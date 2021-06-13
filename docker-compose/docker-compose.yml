@@ -38,15 +38,19 @@ services:
     container_name: nextcloud-mysql
     networks:
       - nextcloud_network
+    ports:
+      - 3306:3306
+    expose:
+      - 3306
     volumes:
       - /data/nextcloud/mysql:/var/lib/mysql
       - /etc/localtime:/etc/localtime:ro
     environment:
-      - MYSQL_ROOT_PASSWORD=mysql-root-p@ssw0rd
-      - MYSQL_PASSWORD=nextcloud-p@ssw0rd
+      - MYSQL_ROOT_PASSWORD=r@@t
+      - MYSQL_PASSWORD=p@ssw0rd
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
-    restart: unless-stopped
+    restart: always
 
 networks:
   nextcloud_network:
