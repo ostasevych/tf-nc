@@ -18,21 +18,20 @@ resource "aws_vpc" "my-vpc" {
 }
 */
 
-resource "aws_instance" "terraform-ci" {
+resource "aws_instance" "docker-compose" {
   count = "${var.instance_count}"
 
   #ami = "${lookup(var.amis,var.region)}"
   ami           = "${var.ami}"
   instance_type = "${var.instance}"
-#  key_name      = "${aws_key_pair.demo_key.key_name}"
-  key_name       = "terraform"
-
+  key_name      = "terraform"
+  private_ip	= "172.31.13.2"
+ 
   vpc_security_group_ids = [
     "${aws_security_group.web.id}",
     "${aws_security_group.ssh.id}",
     "${aws_security_group.egress-tls.id}",
     "${aws_security_group.ping-ICMP.id}",
-    "${aws_security_group.web_server.id}"
   ]
 
   
@@ -48,6 +47,40 @@ resource "aws_instance" "terraform-ci" {
   connection {
     type        = "${var.connection_type}"
     private_key = "${file(pathexpand(var.private_key))}"
+    user        = "${var.ansible_user}"
+    host        = "${self.private_ip}"
+    agent       = false
+    timeout     = "2m"
+  }
+
+  tags = {
+    Name     = "docker-compose-${count.index +1 }"
+    Location = "Ireland"
+  }
+}
+
+
+resource "aws_instance" "terraform-ci" {
+  count = "${var.instance_count}"
+
+  #ami = "${lookup(var.amis,var.region)}"
+  ami           = "${var.ami}"
+  instance_type = "${var.instance}"
+#  key_name      = "${aws_key_pair.demo_key.key_name}"
+  key_name       = "terraform"
+  private_ip	= "172.31.13.3"
+
+  vpc_security_group_ids = [
+#    "${aws_security_group.web.id}",
+    "${aws_security_group.ssh.id}",
+    "${aws_security_group.egress-tls.id}",
+    "${aws_security_group.ping-ICMP.id}",
+    "${aws_security_group.web_server.id}"
+  ]
+
+  connection {
+    type        = "${var.connection_type}"
+    private_key = "${file(pathexpand(var.private_key))}"
 ##    private_key = "${file("~/.ssh/terraform.pem")}"
     user        = "${var.ansible_user}"
     host        = "${self.public_ip}"
@@ -56,9 +89,12 @@ resource "aws_instance" "terraform-ci" {
     timeout     = "2m"
   }
 
+#  depends_on = [
+#    aws_pri_ip,
+#  ]
+
   #user_data = "${file("../templates/install_jenkins.sh")}"
   #user_data = "${file("../templates/install_ansible.sh")}"
-
 
   # Installing ansible on remote machine
   # Ansible requires Python to be installed on the remote machine as well as the local machine.
@@ -72,20 +108,21 @@ resource "aws_instance" "terraform-ci" {
 #	      "sudo pip3 install --upgrade ansible",
 	      "sudo apt-get install ansible -y",
 	      "echo \"Running Ansible in `pwd`\"",
-	      "git clone https://github.com/ostasevych/tf-nc.git",
-	      "ansible-playbook ~/tf-nc/playbooks/install_java.yaml",
-	      "echo \"Java OpenJDK installed\"",
-	      "ansible-playbook ~/tf-nc/playbooks/install_jenkins.yaml",
-	      "echo \"Jenkins installed, available at http://${self.public_ip}:8080 \"",
-	      "ansible-playbook ~/tf-nc/playbooks/install_docker-compose.yaml",
-	      "echo \"Docker compose installed\"",
 	      "ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa",
 	      "echo \"Generated ssh keys pair\"",
 	      "eval \"$(ssh-agent -s)\"",
 	      "ssh-add ~/.ssh/id_rsa",
 	      "echo \"Added SSH key to the ssh-agent\"",
-	      "git remote set-url origin git@github.com:ostasevych/tf-nc.git",
-	      "echo \"Switched GitHub origin to ssh\""
+	      "git clone https://github.com/ostasevych/tf-nc.git",
+	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/install_java.yaml",
+	      "echo \"Java OpenJDK installed\"",
+	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/install_jenkins.yaml",
+	      "echo \"Jenkins installed, available at http://${self.public_ip}:8080 \"",
+#	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/install_docker-compose.yaml",
+	      "ansible-playbook -i ${aws_instance.docker-compose.0.private_ip} ~/tf-nc/playbooks/install_docker-compose2.yaml",
+#	      "echo \"Docker compose installed\"",
+#	      "git remote set-url origin git@github.com:ostasevych/tf-nc.git",
+#	      "echo \"Switched GitHub origin to ssh\""
 ]
   }
 
@@ -94,6 +131,7 @@ resource "aws_instance" "terraform-ci" {
     Location = "Ireland"
   }
 }
+
 
 resource "aws_security_group" "web" {
   name        = "sec-default-web"
