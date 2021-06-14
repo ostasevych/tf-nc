@@ -81,10 +81,10 @@ resource "aws_instance" "terraform-ci" {
   connection {
     type        = "${var.connection_type}"
     private_key = "${file(pathexpand(var.private_key))}"
-##    private_key = "${file("~/.ssh/terraform.pem")}"
+##  private_key = "${file("~/.ssh/terraform.pem")}"
     user        = "${var.ansible_user}"
     host        = "${self.public_ip}"
-##    host        = coalesce(self.public_ip, self.private_ip)
+##  host        = coalesce(self.public_ip, self.private_ip)
     agent       = false
     timeout     = "2m"
   }
@@ -119,8 +119,11 @@ resource "aws_instance" "terraform-ci" {
 	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/install_jenkins.yaml",
 	      "echo \"Jenkins installed, available at http://${self.public_ip}:8080 \"",
 #	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/install_docker-compose.yaml",
-	      "ansible-playbook -i ${aws_instance.docker-compose.0.private_ip} ~/tf-nc/playbooks/install_docker-compose2.yaml",
-#	      "echo \"Docker compose installed\"",
+	      "echo \"${file("~/.ssh/terraform.pem")}\" > ~/.ssh/terraform.pem",
+	      "chmod 400 ~/.ssh/terraform.pem",
+	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/terraform.pem ~/tf-nc/playbooks/install_docker-compose2.yaml",
+	      "rm -f ~/.ssh/terraform.pem",
+	      "echo \"Docker compose installed\"",
 #	      "git remote set-url origin git@github.com:ostasevych/tf-nc.git",
 #	      "echo \"Switched GitHub origin to ssh\""
 ]
