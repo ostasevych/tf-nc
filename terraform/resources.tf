@@ -1,10 +1,11 @@
-#resource "aws_key_pair" "terraform" {
-#  key_name   = "terraform"
+resource "aws_key_pair" "my-key-pair" {
+  key_name   = "my-key-pair"
 #  public_key = "${file(pathexpand(var.public_key))}"
-##  public_key = "${file("~/.ssh/id_rsa.pub")}"
-#}
+  public_key = "${file(var.PUBLIC_KEY_PATH)}"
 
-/*
+
+}
+
 resource "aws_vpc" "my-vpc" {
   cidr_block           = "10.0.0.0/16" # Defines overall VPC address space
   enable_dns_hostnames = true          # Enable DNS hostnames for this VPC
@@ -12,21 +13,165 @@ resource "aws_vpc" "my-vpc" {
   instance_tenancy     = "default"
   enable_classiclink   = "false"
 
-  tags {
+  tags = {
     Name = "VPC-my-vpc" # Tag VPC with name
   }
 }
-*/
+
+resource "aws_subnet" "my-subnet-1" {
+    vpc_id = "${aws_vpc.my-vpc.id}"
+    cidr_block = "10.0.0.0/24"
+    map_public_ip_on_launch = "true" //it makes this a public subnet
+#    availability_zone = "${lookup(var.az,count.index)}"
+    availability_zone = "eu-west-1a"
+
+    tags = {
+        Name = "my-subnet-1"
+    }
+}
+
+
+resource "aws_internet_gateway" "my-igw" {
+    vpc_id = "${aws_vpc.my-vpc.id}"
+    tags = {
+        Name = "my-igw"
+    }
+}
+
+resource "aws_route_table" "my-public-crt" {
+    vpc_id = "${aws_vpc.my-vpc.id}"
+    route {
+        //associated subnet can reach everywhere
+        cidr_block = "0.0.0.0/0" 
+        //CRT uses this IGW to reach internet
+        gateway_id = "${aws_internet_gateway.my-igw.id}" 
+    }
+    
+    tags = {
+        Name = "my-public-crt"
+    }
+}
+
+resource "aws_route_table_association" "my-crta-public-subnet-1"{
+    subnet_id = "${aws_subnet.my-subnet-1.id}"
+    route_table_id = "${aws_route_table.my-public-crt.id}"
+}
+
+resource "aws_security_group" "web" {
+  name        = "sec-default-web"
+  description = "Security group for web that allows web traffic from internet"
+  vpc_id      = "${aws_vpc.my-vpc.id}"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "web-default-vpc"
+  }
+}
+
+resource "aws_security_group" "ssh" {
+  name        = "sec-default-ssh"
+  description = "Security group for nat instances that allows SSH and VPN traffic from internet"
+  vpc_id      = "${aws_vpc.my-vpc.id}"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "ssh-default-vpc"
+  }
+}
+
+resource "aws_security_group" "egress-tls" {
+  name        = "sec-default-egress-tls"
+  description = "Default security group that allows inbound and outbound traffic from all instances in the VPC"
+  vpc_id      = "${aws_vpc.my-vpc.id}"
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "egress-tls-default-vpc"
+  }
+}
+
+resource "aws_security_group" "ping-ICMP" {
+  name        = "sec-default-ping"
+  description = "Default security group that allows to ping the instance"
+  vpc_id      = "${aws_vpc.my-vpc.id}"
+
+  ingress {
+    from_port        = -1
+    to_port          = -1
+    protocol         = "icmp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  tags = {
+    Name = "ping-ICMP-default-vpc"
+  }
+}
+
+# Allow the web app to receive requests on port 8080
+resource "aws_security_group" "web_server" {
+  name        = "sec-default-web_server"
+  description = "Default security group that allows to use port 8080"
+  vpc_id      = "${aws_vpc.my-vpc.id}"
+  
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "web_server-default-vpc"
+  }
+}
 
 resource "aws_instance" "docker-compose" {
   count = "${var.instance_count}"
-
-  #ami = "${lookup(var.amis,var.region)}"
-  ami           = "${var.ami}"
+  ami = "${lookup(var.amis,var.region)}"
+#  ami           = "${var.ami}"
   instance_type = "${var.instance}"
-  key_name      = "terraform"
-  private_ip	= "172.31.13.2"
- 
+
+# VPC
+  subnet_id = "${aws_subnet.my-subnet-1.id}"
+
+# the Public SSH key
+  key_name = "${aws_key_pair.my-key-pair.id}"
+#  key_name      = "terraform"
+
+# Defining private IP
+#  private_ip	= "172.31.32.101"
+#  private_ip = "${aws_subnet.my-subnet-1.private_ip}"
+#   private_ip = "10.0.1.2"
+  private_ip = "${lookup(var.private_ips,count.index)}"
+
+
+# Security Group
   vpc_security_group_ids = [
     "${aws_security_group.web.id}",
     "${aws_security_group.ssh.id}",
@@ -34,10 +179,11 @@ resource "aws_instance" "docker-compose" {
     "${aws_security_group.ping-ICMP.id}",
   ]
 
-  
+# Defining EBS volumes
+
   ebs_block_device {
     device_name           = "/dev/sdg"
-    volume_size           = 100
+    volume_size           = 10
     volume_type           = "io1"
     iops                  = 2000
     encrypted             = true
@@ -63,15 +209,26 @@ resource "aws_instance" "docker-compose" {
 resource "aws_instance" "terraform-ci" {
   count = "${var.instance_count}"
 
-  #ami = "${lookup(var.amis,var.region)}"
-  ami           = "${var.ami}"
+  ami = "${lookup(var.amis,var.region)}"
+#  ami           = "${var.ami}"
   instance_type = "${var.instance}"
-#  key_name      = "${aws_key_pair.demo_key.key_name}"
-  key_name       = "terraform"
-  private_ip	= "172.31.13.3"
 
+# VPC
+  subnet_id = "${aws_subnet.my-subnet-1.id}"
+
+# the Public SSH key
+   key_name = "${aws_key_pair.my-key-pair.id}"
+#  key_name      = "${aws_key_pair.demo_key.key_name}"
+#  key_name       = "terraform"
+
+
+# Defining private ip address
+#  private_ip	=  "172.31.32.102"
+  private_ip = "${lookup(var.private_ips,count.index+1)}"
+
+# Security Group
   vpc_security_group_ids = [
-#    "${aws_security_group.web.id}",
+#   "${aws_security_group.web.id}",
     "${aws_security_group.ssh.id}",
     "${aws_security_group.egress-tls.id}",
     "${aws_security_group.ping-ICMP.id}",
@@ -79,14 +236,15 @@ resource "aws_instance" "terraform-ci" {
   ]
 
   connection {
-    type        = "${var.connection_type}"
-    private_key = "${file(pathexpand(var.private_key))}"
-##  private_key = "${file("~/.ssh/terraform.pem")}"
+#    type        = "${var.connection_type}"
+    private_key = "${file("${var.PRIVATE_KEY_PATH}")}"
+##    private_key = "${file(pathexpand(var.private_key))}"
+##    private_key = "${file("~/.ssh/terraform.pem")}"
     user        = "${var.ansible_user}"
     host        = "${self.public_ip}"
-##  host        = coalesce(self.public_ip, self.private_ip)
-    agent       = false
-    timeout     = "2m"
+#    host        = coalesce(self.public_ip, self.private_ip)
+#    agent       = false
+#    timeout     = "2m"
   }
 
 #  depends_on = [
@@ -99,11 +257,11 @@ resource "aws_instance" "terraform-ci" {
   # Installing ansible on remote machine
   # Ansible requires Python to be installed on the remote machine as well as the local machine.
   provisioner "remote-exec" {
-    inline = ["sudo apt-get update",
-#	      "sudo apt-get -qq install python3 -y",
-	      "sudo apt-get upgrade python3 -y",
-	      "sudo apt-get update",
-#	      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y install python3-pip git",
+    inline = ["sudo apt update",
+#	      "sudo apt -qq install python3 -y",
+	      "sudo apt upgrade python3 -y",
+	      "sudo apt update",
+	      "sudo apt install python3-pip git -y",
 #	      "sudo pip3 install --upgrade pip3",
 #	      "sudo pip3 install --upgrade ansible",
 	      "sudo apt-get install ansible -y",
@@ -119,10 +277,14 @@ resource "aws_instance" "terraform-ci" {
 	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/install_jenkins.yaml",
 	      "echo \"Jenkins installed, available at http://${self.public_ip}:8080 \"",
 #	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/install_docker-compose.yaml",
-	      "echo \"${file("~/.ssh/terraform.pem")}\" > ~/.ssh/terraform.pem",
-	      "chmod 400 ~/.ssh/terraform.pem",
-	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/terraform.pem ~/tf-nc/playbooks/install_docker-compose2.yaml",
-	      "rm -f ~/.ssh/terraform.pem",
+#	      "echo \"${file("~/.ssh/terraform.pem")}\" > ~/.ssh/terraform.pem",
+	      "echo \"${file("${var.PRIVATE_KEY_PATH}")}\" > ~/.ssh/my-key-pair; chmod 400 ~/.ssh/my-key-pair",
+#	      "chmod 400 ~/.ssh/terraform.pem",
+	      "cat ~/.ssh/id_rsa.pub | ssh -i \"${file("${var.PRIVATE_KEY_PATH}")}\" ${aws_instance.docker-compose.0.private_ip} 'cat - >> ~/.ssh/authorized_keys'
+#	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/terraform.pem -u ${var.ansible_user} ~/tf-nc/playbooks/install_docker-compose2.yaml",
+	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/my-key-pair -u ${var.ansible_user} ~/tf-nc/playbooks/install_docker-compose2.yaml",
+#	      "rm -f ~/.ssh/terraform.pem",
+	      "rm -f ~/.ssh/my-key-pair",
 	      "echo \"Docker compose installed\"",
 #	      "git remote set-url origin git@github.com:ostasevych/tf-nc.git",
 #	      "echo \"Switched GitHub origin to ssh\""
@@ -132,100 +294,5 @@ resource "aws_instance" "terraform-ci" {
   tags = {
     Name     = "terraform-ci-${count.index +1 }"
     Location = "Ireland"
-  }
-}
-
-
-resource "aws_security_group" "web" {
-  name        = "sec-default-web"
-  description = "Security group for web that allows web traffic from internet"
-  #vpc_id      = "${aws_vpc.my-vpc.id}"
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "web-default-vpc"
-  }
-}
-
-resource "aws_security_group" "ssh" {
-  name        = "sec-default-ssh"
-  description = "Security group for nat instances that allows SSH and VPN traffic from internet"
-  #vpc_id      = "${aws_vpc.my-vpc.id}"
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "ssh-default-vpc"
-  }
-}
-
-resource "aws_security_group" "egress-tls" {
-  name        = "sec-default-egress-tls"
-  description = "Default security group that allows inbound and outbound traffic from all instances in the VPC"
-  #vpc_id      = "${aws_vpc.my-vpc.id}"
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "egress-tls-default-vpc"
-  }
-}
-
-resource "aws_security_group" "ping-ICMP" {
-  name        = "sec-default-ping"
-  description = "Default security group that allows to ping the instance"
-  #vpc_id      = "${aws_vpc.my-vpc.id}"
-
-  ingress {
-    from_port        = -1
-    to_port          = -1
-    protocol         = "icmp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
-  tags = {
-    Name = "ping-ICMP-default-vpc"
-  }
-}
-
-# Allow the web app to receive requests on port 8080
-resource "aws_security_group" "web_server" {
-  name        = "sec-default-web_server"
-  description = "Default security group that allows to use port 8080"
-  #vpc_id      = "${aws_vpc.my-vpc.id}"
-  
-  ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "web_server-default-vpc"
   }
 }

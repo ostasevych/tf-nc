@@ -1,0 +1,14 @@
+# Running docker images via docker-compose
+---
+- hosts: all
+
+#  vars_files:
+#   - vars/external_vars.yaml
+
+  tasks:
+
+  - name: Run containers in docker-compose
+    become: false
+    shell:
+      cmd: "VIRTUAL_HOST=`host $(curl -s 169.254.169.254/2009-04-04/meta-data/public-ipv4) | cut -d' ' -f 5 | sed 's/.$//'` docker-compose -f docker-compose.yaml up -d"
+      chdir: ~/docker

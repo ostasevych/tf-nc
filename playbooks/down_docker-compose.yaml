@@ -1,0 +1,14 @@
+# Running docker image via docker-compose
+---
+- hosts: all
+
+#  vars_files:
+#   - vars/external_vars.yaml
+
+  tasks:
+
+  - name: Run containers in docker-compose
+    become: false
+    shell:
+      cmd: "docker-compose -f docker-compose.yaml stop"
+      chdir: ~/docker

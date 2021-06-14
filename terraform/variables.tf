@@ -18,6 +18,14 @@ variable "public_key" {
   default = "~/.ssh/id_rsa.pub"
 }
 
+variable "PUBLIC_KEY_PATH" {
+  default = "my-key-pair.pub"
+}
+
+variable "PRIVATE_KEY_PATH" {
+  default = "my-key-pair"
+}
+
 variable "private_key" {
   default = "~/.ssh/terraform.pem"
 }
@@ -44,3 +52,19 @@ variable "ami" {
   default = "ami-0a8e758f5e873d1c1"
 }
 
+variable "az" {
+  default = {
+    "0" = "eu-west-1a"
+    "1" = "eu-west-1b"
+    "2" = "eu-west-1c"
+  }
+}
+
+
+variable "private_ips" {
+  default = {
+    "0" = "10.0.0.100"
+    "1" = "10.0.0.101"
+//    "2" = "10.0.0.102"
+  }
+}

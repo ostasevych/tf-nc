@@ -1,0 +1,33 @@
+---
+# Run the service defined in docker-compose.yml
+- hosts: all
+  gather_facts: false
+#  connection: local
+#  gather_facts: true
+  become: true
+#  vars:
+#    docker_compose_version: "1.29.2"
+  tasks:
+
+  - name: Service file creation
+    copy:
+      dest: /etc/systemd/system/docker-compose.service
+      content: |
+        [Unit] 
+        Description=Docker Compose Service
+        Requires=docker.service
+        After=docker.service
+        [Service]
+        Type=oneshot
+        RemainAfterExit=true
+        WorkingDirectory=/docker
+        ExecStart=docker-compose up -d --remove-orphans
+        ExecStop=docker-compose down
+        [Install]
+        WantedBy=multi-user.target
+
+#  - name: Systemd service activation
+#    systemd:
+#    name: docker-compose.service
+#    enabled: yes
+#    state: started
