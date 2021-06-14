@@ -9,10 +9,10 @@
 
   - name: Create remote directory project
     file:
-      path: "~/project"
+      path: "~/docker"
       state: directory
 
   - name: Copying docker-compose.yaml
     copy:
-      src: ~/epam-devops-learning/project/tf-nc/docker/docker-compose.yaml
+      src: ~/tf-nc/docker/docker-compose.yaml
       dest: ~/docker
