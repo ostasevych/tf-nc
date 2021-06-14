@@ -1,9 +1,14 @@
 ---
-- hosts: localhost
-  connection: local
+- name: Install Docker Compose 
+  hosts: all
+#  connection: local
+  gather_facts: true
   become: true
   vars:
     docker_compose_version: "1.29.2"
+
+  vars_files:
+    - vars/external_vars.yaml
 
   tasks:
     - name: Update apt cache
