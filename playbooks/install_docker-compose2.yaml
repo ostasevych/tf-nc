@@ -6,6 +6,9 @@
   vars:
     docker_compose_version: "1.29.2"
 
+  vars_files:
+    - vars/external_vars.yml
+
   tasks:
     - name: Update apt cache
       apt: update_cache=yes cache_valid_time=3600
