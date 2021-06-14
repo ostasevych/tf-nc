@@ -5,5 +5,5 @@ localhost
 INSTANCES_IPS
 
 [docker_compose:vars]
-ansible_ssh_user=ubuntu
+ansible_user=ubuntu
 ansible_sudo=yes
