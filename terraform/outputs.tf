@@ -35,6 +35,6 @@ output "url-jenkins" {
 }
 
 output "url-docker" {
-  value = "https://${aws_instance.docker-compose.ci.0.public_ip}"
+  value = "http://${aws_instance.docker-compose.0.public_ip}"
 }
  
