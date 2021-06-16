@@ -69,9 +69,9 @@ services:
       - /data/nextcloud/app/themes:/var/www/html/themes
       - /etc/localtime:/etc/localtime:ro
     environment:
-      - VIRTUAL_HOST=ec2-52-208-30-114.eu-west-1.compute.amazonaws.com
-      - LETSENCRYPT_HOST=ec2-52-208-30-114.eu-west-1.compute.amazonaws.com
-      - LETSENCRYPT_EMAIL=root@ec2-52-208-30-114.eu-west-1.compute.amazonaws.com
+      - VIRTUAL_HOST=${VIRTUAL_HOST}
+      - LETSENCRYPT_HOST=${VIRTUAL_HOST}
+      - LETSENCRYPT_EMAIL=root@${VIRTUAL_HOST}
     restart: unless-stopped
 
 networks:

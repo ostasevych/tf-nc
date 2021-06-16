@@ -1,10 +1,35 @@
-resource "aws_key_pair" "my-key-pair" {
-  key_name   = "my-key-pair"
-#  public_key = "${file(pathexpand(var.public_key))}"
-  public_key = "${file(var.PUBLIC_KEY_PATH)}"
-
-
+resource "aws_key_pair" "generated_key" {
+    key_name   = "${uuid()}"
+    public_key = "${tls_private_key.t.public_key_openssh}"
 }
+provider "tls" {}
+resource "tls_private_key" "t" {
+    algorithm = "RSA"
+}
+
+provider "local" {}
+
+resource "local_file" "private_key" {
+    content  = "${tls_private_key.t.private_key_pem}"
+    filename = "${var.PRIVATE_KEY_PATH}"
+    provisioner "local-exec" {
+        command = "chmod 600 ${var.PRIVATE_KEY_PATH}"
+    }
+}
+
+resource "local_file" "public_key" {
+    content  = "${tls_private_key.t.public_key_openssh}"
+    filename = "${var.PUBLIC_KEY_PATH}"
+    provisioner "local-exec" {
+        command = "chmod 644 ${var.PUBLIC_KEY_PATH}"
+    }
+}
+
+#resource "aws_key_pair" "my-key-pair" {
+#  key_name   = "my-key-pair"
+##  public_key = "${file(pathexpand(var.public_key))}"
+#  public_key = "${file(var.PUBLIC_KEY_PATH)}"
+#}
 
 resource "aws_vpc" "my-vpc" {
   cidr_block           = "10.0.0.0/16" # Defines overall VPC address space
@@ -161,7 +186,8 @@ resource "aws_instance" "docker-compose" {
   subnet_id = "${aws_subnet.my-subnet-1.id}"
 
 # the Public SSH key
-  key_name = "${aws_key_pair.my-key-pair.id}"
+key_name      = aws_key_pair.generated_key.key_name
+#  key_name = "${aws_key_pair.my-key-pair.id}"
 #  key_name      = "terraform"
 
 # Defining private IP
@@ -181,22 +207,47 @@ resource "aws_instance" "docker-compose" {
 
 # Defining EBS volumes
 
-  ebs_block_device {
-    device_name           = "/dev/sdg"
-    volume_size           = 10
-    volume_type           = "io1"
-    iops                  = 2000
-    encrypted             = true
-    delete_on_termination = true
-  }
+#  ebs_block_device {
+#    device_name           = "/dev/sdg"
+#    volume_size           = 10
+#    volume_type           = "gp2"
+#    iops                  = 0
+#    encrypted             = true
+#    delete_on_termination = true
+#  }
 
   connection {
-    type        = "${var.connection_type}"
-    private_key = "${file(pathexpand(var.private_key))}"
-    user        = "${var.ansible_user}"
-    host        = "${self.private_ip}"
-    agent       = false
-    timeout     = "2m"
+     type        = "${var.connection_type}"
+     private_key = "${tls_private_key.t.private_key_pem}"
+     user        = "${var.ansible_user}"
+     host        = "${self.public_ip}"
+     agent       = false
+     timeout     = "2m"
+  }
+
+#  provisioner "file" {
+#    source = var.PRIVATE_KEY_PATH
+#    destination = "~/.ssh/${var.PRIVATE_KEY_PATH}"
+#   }
+
+# Adding public key to the docker-compose VM
+
+  provisioner "local-exec" {
+    command = "echo \"${file(var.PUBLIC_KEY_PATH)}\" > ./authorized_keys; chmod 600 authorized_keys"
+}
+
+  provisioner "file" {
+    source = "authorized_keys"
+    destination = "~/authorized_keys"
+   }
+
+  provisioner "remote-exec" {
+    inline = [
+        "cat ~/authorized_keys >> ~/.ssh/authorized_keys; chmod 600 ~/.ssh/authorized_keys; rm -f authorized_keys"
+    ]
+  }
+  provisioner "local-exec" {
+    command = "rm -f authorized_keys"
   }
 
   tags = {
@@ -217,13 +268,12 @@ resource "aws_instance" "terraform-ci" {
   subnet_id = "${aws_subnet.my-subnet-1.id}"
 
 # the Public SSH key
-   key_name = "${aws_key_pair.my-key-pair.id}"
-#  key_name      = "${aws_key_pair.demo_key.key_name}"
-#  key_name       = "terraform"
+  key_name       = aws_key_pair.generated_key.key_name
+# key_name       = "${aws_key_pair.my-key-pair.id}"
+# key_name       = "terraform"
 
 
 # Defining private ip address
-#  private_ip	=  "172.31.32.102"
   private_ip = "${lookup(var.private_ips,count.index+1)}"
 
 # Security Group
@@ -236,56 +286,73 @@ resource "aws_instance" "terraform-ci" {
   ]
 
   connection {
-#    type        = "${var.connection_type}"
-    private_key = "${file("${var.PRIVATE_KEY_PATH}")}"
-##    private_key = "${file(pathexpand(var.private_key))}"
-##    private_key = "${file("~/.ssh/terraform.pem")}"
-    user        = "${var.ansible_user}"
-    host        = "${self.public_ip}"
-#    host        = coalesce(self.public_ip, self.private_ip)
-#    agent       = false
-#    timeout     = "2m"
+     type        = "${var.connection_type}"
+     private_key = "${tls_private_key.t.private_key_pem}"
+     user        = "${var.ansible_user}"
+     host        = "${self.public_ip}"
+     agent       = false
+     timeout     = "2m"
   }
 
-#  depends_on = [
-#    aws_pri_ip,
-#  ]
 
   #user_data = "${file("../templates/install_jenkins.sh")}"
   #user_data = "${file("../templates/install_ansible.sh")}"
 
-  # Installing ansible on remote machine
-  # Ansible requires Python to be installed on the remote machine as well as the local machine.
+# Sending private key to the VM
+
+  provisioner "file" {
+    source = var.PRIVATE_KEY_PATH
+    destination = "~/.ssh/${var.PRIVATE_KEY_PATH}"
+   }
+
+
+# Installing ansible on remote machine
+# Ansible requires Python to be installed on the remote machine as well as the local machine.
+  
   provisioner "remote-exec" {
-    inline = ["sudo apt update",
-#	      "sudo apt -qq install python3 -y",
-	      "sudo apt upgrade python3 -y",
-	      "sudo apt update",
-	      "sudo apt install python3-pip git -y",
-#	      "sudo pip3 install --upgrade pip3",
-#	      "sudo pip3 install --upgrade ansible",
-	      "sudo apt-get install ansible -y",
-	      "echo \"Running Ansible in `pwd`\"",
+    inline = [
+	      "chmod 400 ~/.ssh/${var.PRIVATE_KEY_PATH}",
+
+	      "sudo apt update && sudo apt upgrade -y",
+	      "sudo apt install python3 -y",
+	      "sudo apt install python3-pip -y",
+	      "sudo apt install git -y",
+	      "sudo apt update && sudo apt upgrade -y",
+	      "sudo apt install ansible -y",
+#	      "sudo pip install --upgrade pip",
+#	      "sudo pip install --upgrade ansible",
+	      "if [ $? -eq 0 ]; then echo \"Installed ansible, running in `pwd`\"; else echo \"Failed to install ansible\"; fi",
+
 	      "ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa",
-	      "echo \"Generated ssh keys pair\"",
-	      "eval \"$(ssh-agent -s)\"",
-	      "ssh-add ~/.ssh/id_rsa",
-	      "echo \"Added SSH key to the ssh-agent\"",
+	      "if [ $? -eq 0 ]; then echo \"Generated ssh keys pair\"; else echo \"Failed to generate ssh keys pair\"; fi",
+#	      "echo \"Generated ssh keys pair\"",
+
+#	      "eval \"$(ssh-agent -s)\"",
+#	      "ssh-add ~/.ssh/id_rsa",
+#	      "ssh-add ./myKey.pem",
+#	      "cat \"${tls_private_key.t.private_key_pem}\"", 
+
+#	      "ssh-add \"${tls_private_key.t.private_key_pem}\"",
+#	      "echo \"Added SSH key to the ssh-agent\"",
+
 	      "git clone https://github.com/ostasevych/tf-nc.git",
+	      "if [ $? -eq 0 ]; then echo \"Successfully cloned git with the configuration\"; else echo \"Failed to clone git\"; fi",
+
 	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/install_java.yaml",
-	      "echo \"Java OpenJDK installed\"",
+	      "if [ $? -eq 0 ]; then echo \"Java OpenJDK installed successfully\"; else echo \"Failed to install Java OpenJDK\"; fi",
+
 	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/install_jenkins.yaml",
-	      "echo \"Jenkins installed, available at http://${self.public_ip}:8080 \"",
-#	      "echo \"${file("~/.ssh/terraform.pem")}\" > ~/.ssh/terraform.pem",
-	      "echo \"${file("${var.PRIVATE_KEY_PATH}")}\" > ~/.ssh/my-key-pair; chmod 400 ~/.ssh/my-key-pair",
-#	      "chmod 400 ~/.ssh/terraform.pem",
-	      "cat ~/.ssh/id_rsa.pub | ssh -i \"${file("${var.PRIVATE_KEY_PATH}")}\" ${aws_instance.docker-compose.0.private_ip} 'cat - >> ~/.ssh/authorized_keys'
-	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/my-key-pair -u ${var.ansible_user} ~/tf-nc/playbooks/install_docker-compose.yaml",
-	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/my-key-pair -u ${var.ansible_user} ~/tf-nc/playbooks/copy_docker-compose.yaml",
-	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/my-key-pair -u ${var.ansible_user} ~/tf-nc/playbooks/start_docker-compose.yaml",
-#	      "rm -f ~/.ssh/terraform.pem",
-	      "rm -f ~/.ssh/my-key-pair",
-	      "echo \"Docker compose installed\"",
+	      "if [ $? -eq 0 ]; then echo \"Successfully installed Jenkins, available at http://${self.public_ip}:8080\"; else echo \"Failed to install and/or run Jenkins\"; fi",
+
+	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/install_docker-compose.yaml",
+	      "if [ $? -eq 0 ]; then echo \"Successfully installed docker-compose at ${aws_instance.docker-compose.0.private_ip}\"; else echo \"Failed to install docker-compose at ${aws_instance.docker-compose.0.private_ip}\"; fi",
+
+	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/copy_docker-compose.yaml",
+	      "if [ $? -eq 0 ]; then echo \"Successfully copied docker-compose.yaml to ${aws_instance.docker-compose.0.private_ip}\"; else echo \"Failed to copy docker-compose.yaml to ${aws_instance.docker-compose.0.private_ip}\"; fi",
+
+	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/start_docker-compose.yaml",
+	      "if [ $? -eq 0 ]; then echo \"Successfully started containers at ${aws_instance.docker-compose.0.private_ip}\"; else echo \"Failed to start containers at ${aws_instance.docker-compose.0.private_ip}\"; fi",
+
 #	      "git remote set-url origin git@github.com:ostasevych/tf-nc.git",
 #	      "echo \"Switched GitHub origin to ssh\""
 ]

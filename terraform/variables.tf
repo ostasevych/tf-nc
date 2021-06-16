@@ -19,16 +19,22 @@ variable "public_key" {
 }
 
 variable "PUBLIC_KEY_PATH" {
-  default = "my-key-pair.pub"
+#  default = "my-key-pair.pub"
+default = "myKey.pub"
 }
 
 variable "PRIVATE_KEY_PATH" {
-  default = "my-key-pair"
+#  default = "my-key-pair"
+default = "myKey.pem"
 }
 
-variable "private_key" {
-  default = "~/.ssh/terraform.pem"
-}
+#variable "public_key" {
+#  default = "~/.ssh/id_rsa.pub"
+#}
+
+#variable "private_key" {
+#  default = "~/.ssh/terraform.pem"
+#}
 
 variable "ansible_user" {
   default = "ubuntu"
