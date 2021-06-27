@@ -1,0 +1,21 @@
+---
+# Run the service defined in docker-compose.yml
+- hosts: all
+  gather_facts: false
+#  connection: local
+#  gather_facts: true
+  become: true
+#  vars:
+#    docker_compose_version: "1.29.2"
+  tasks:
+
+  - name: Make sure a service is running
+    systemd:
+      state: started
+      name: nextcloud.service
+
+  - name: Restart service
+    systemd:
+      name: nextcloud.service
+      daemon_reload: yes
+      state: restarted

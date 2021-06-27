@@ -349,7 +349,10 @@ resource "aws_instance" "terraform-ci" {
 	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/copy_docker-compose.yaml",
 	      "if [ $? -eq 0 ]; then echo \"Successfully copied docker-compose.yaml to ${aws_instance.docker-compose.0.private_ip}\"; else echo \"Failed to copy docker-compose.yaml to ${aws_instance.docker-compose.0.private_ip}\"; fi",
 
-	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/run_docker-compose.yaml",
+	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/service_docker-compose.yaml",
+	      "if [ $? -eq 0 ]; then echo \"Successfully created nextcloud.service at ${aws_instance.docker-compose.0.private_ip}\"; else echo \"Failed to add nextcloud.service at ${aws_instance.docker-compose.0.private_ip}\"; fi",
+
+	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/start_docker-compose.yaml",
 	      "if [ $? -eq 0 ]; then echo \"Successfully started containers at ${aws_instance.docker-compose.0.private_ip}\"; else echo \"Failed to start containers at ${aws_instance.docker-compose.0.private_ip}\"; fi",
 
 #	      "git remote set-url origin git@github.com:ostasevych/tf-nc.git",

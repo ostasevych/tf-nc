@@ -26,8 +26,8 @@
         [Install]
         WantedBy=multi-user.target
 
-  - name: Systemd service activation
+  - name: Enable service nextcloud and ensure that it is not masked
     systemd:
       name: nextcloud.service
       enabled: yes
-      state: stopped
+      masked: no

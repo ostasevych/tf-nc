@@ -1,4 +1,4 @@
-# Running docker image via docker-compose
+# Stop docker images via docker-compose
 ---
 - hosts: all
 
@@ -7,8 +7,8 @@
 
   tasks:
 
-  - name: Run containers in docker-compose
+  - name: Stop containers in docker-compose
     become: false
     shell:
-      cmd: "docker-compose -f docker-compose.yaml stop"
+      cmd: "docker-compose -f docker-compose.yaml down"
       chdir: ~/docker

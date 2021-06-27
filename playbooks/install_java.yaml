@@ -19,7 +19,7 @@
     become: yes
     debconf: name='oracle-java8-installer' question='shared/accepted-oracle-license-v1-1' value='true' vtype='select'
  
-  - name: update cache and ignore errors in case of problems
+  - name: Update cache and ignore errors in case of problems
     become: yes
     apt: update_cache=yes
     ignore_errors: yes
