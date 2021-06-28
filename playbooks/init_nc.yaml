@@ -1,5 +1,6 @@
 ---
 - hosts: all
+  become: true
   vars_files:
   - vars/credentials.yaml
   - vars/external_vars.yaml
@@ -9,15 +10,15 @@
 
   tasks:
   - name: first occ init
-    become: true
-    shell: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ maintenance:install --database {{ DB_TYPE }} --database-host {{ DB_HOST }} --database-name {{ DB_NAME }} --database-user {{ DB_USER }} --database-pass {{ DB_PASS }} --admin-user {{ ADMIN_USER }} --admin-pass {{ ADMIN_PASS }} --data-dir {{ APP_PATH }}/data
+#    become: true
+    shell: sudo docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ maintenance:install --database {{ DB_TYPE }} --database-host {{ DB_HOST }} --database-name {{ DB_NAME }} --database-user {{ DB_USER }} --database-pass {{ DB_PASS }} --admin-user {{ ADMIN_USER }} --admin-pass {{ ADMIN_PASS }} --data-dir {{ APP_PATH }}/data
     register: oc_init
 
   - debug: msg="{{ oc_init.stdout }}"
 
   - name: add trusted domain
-    become: true
-    shell: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ config:system:set trusted_domains 2 --value={{ virtual_host }}
+#    become: true
+    shell: sudo docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ config:system:set trusted_domains 2 --value={{ virtual_host }}
     register: trusted_add
 
   - debug: msg="{{ trusted_add.stdout }}"
