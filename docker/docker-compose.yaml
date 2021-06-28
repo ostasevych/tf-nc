@@ -1,4 +1,4 @@
-version: '3'  
+version: '3'
 services:
   nginx-proxy:
     image: jwilder/nginx-proxy:alpine
@@ -31,7 +31,7 @@ services:
       - /data/nextcloud/nginx/certs:/etc/nginx/certs:rw
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    restart: unless-stopped   
+    restart: unless-stopped
 
   mysql:
     image: mariadb
@@ -55,6 +55,7 @@ services:
   nextcloud-app:
     image: nextcloud:latest
     container_name: nextcloud-app
+    env_file: hosts.env
     networks:
       - nextcloud_network
     depends_on:
@@ -73,6 +74,13 @@ services:
       - LETSENCRYPT_HOST=${VIRTUAL_HOST}
       - LETSENCRYPT_EMAIL=root@${VIRTUAL_HOST}
     restart: unless-stopped
+
+  nextcloud_app_first_run:
+    image: nextcloud:latest
+    depends_on:
+      - nextcloud-app
+    restart: "no"
+    entrypoint: [ "bash", "-c", "php occ maintenance:install --database mysql --database-host mysql --database-name nextcloud --database-user nextcloud --database-pass p@ssw0rd --admin-user admin --admin-pass r00t --data-dir /var/www/html/data" ]
 
 networks:
   nextcloud_network:

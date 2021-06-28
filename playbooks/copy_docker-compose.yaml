@@ -1,4 +1,4 @@
-# Copy docker images to remote VM
+# Copy docker images to remote VM, create environment variables
 ---
 - hosts: all
 
@@ -16,3 +16,8 @@
     copy:
       src: ~/tf-nc/docker/docker-compose.yaml
       dest: ~/docker
+
+  - name: Create hosts.env
+    shell:
+      cmd: 'echo VIRTUAL_HOST=\"{{ virtual_host }}\" > virtual_host.env'
+      chdir: ~/docker

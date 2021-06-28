@@ -176,6 +176,65 @@ resource "aws_security_group" "web_server" {
   }
 }
 
+
+resource "aws_s3_bucket" "nc-bucket-data" {
+  bucket = "${var.name_prefix}-nc-data"
+  acl    = "private"
+
+  versioning {
+    enabled = true
+  }
+  force_destroy = true
+  policy = jsonencode({
+   Version: "2012-10-17",
+   Statement: [
+    {
+      Sid: "KMS Manager",
+      Effect: "Allow",
+      Principal: "*",
+      Action: [
+        "s3:*"
+      ],
+      Resource: [
+        "arn:aws:s3:::${var.name_prefix}-nc-data",
+        "arn:aws:s3:::${var.name_prefix}-nc-data/*"
+      ]
+    },
+    {
+      Sid: "Iam user bucket",
+      Effect: "Allow",
+      Principal: "*",
+      Action: [
+        "s3:ListBucket"
+      ],
+      Resource: ["arn:aws:s3:::${var.name_prefix}-nc-data"]
+    },
+    {
+      Sid: "Iam user objects",
+      Effect: "Allow",
+      Principal: "*",
+      Action: [
+        "s3:GetObject",
+        "s3:GetObjectVersion",
+        "s3:PutObject",
+        "s3:PutObjectAcl",
+        "s3:DeleteObject"
+      ],
+      Resource: ["arn:aws:s3:::${var.name_prefix}-nc-data/*"]
+    }
+  ]
+})
+}
+
+# s3 block all public access to bucket
+resource "aws_s3_bucket_public_access_block" "nc-bucket-pubaccessblock-data" {
+  bucket                  = aws_s3_bucket.nc-bucket-data.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 resource "aws_instance" "docker-compose" {
   count = "${var.instance_count}"
   ami = "${lookup(var.amis,var.region)}"
@@ -259,7 +318,6 @@ key_name      = aws_key_pair.generated_key.key_name
 
 resource "aws_instance" "terraform-ci" {
   count = "${var.instance_count}"
-
   ami = "${lookup(var.amis,var.region)}"
 #  ami           = "${var.ami}"
   instance_type = "${var.instance}"
@@ -337,6 +395,10 @@ resource "aws_instance" "terraform-ci" {
 	      "git clone https://github.com/ostasevych/tf-nc.git",
 	      "if [ $? -eq 0 ]; then echo \"Successfully cloned git with the configuration\"; else echo \"Failed to clone git\"; fi",
 
+	      "echo \"virtual_host: ${aws_instance.docker-compose.0.public_dns} >> ~/tf-nc/playbooks/vars/external_vars.yaml\"",
+	      "if [ $? -eq 0 ]; then echo \"Public DNS name has been successfully sent to ansible virtual_host variable at external_vars.yaml\"; else echo \"Failed to store virtual_host variable at ansible external_vars.yaml \"; fi",
+
+
 	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/install_java.yaml",
 	      "if [ $? -eq 0 ]; then echo \"Java OpenJDK installed successfully\"; else echo \"Failed to install Java OpenJDK\"; fi",
 
@@ -349,7 +411,10 @@ resource "aws_instance" "terraform-ci" {
 	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/copy_docker-compose.yaml",
 	      "if [ $? -eq 0 ]; then echo \"Successfully copied docker-compose.yaml to ${aws_instance.docker-compose.0.private_ip}\"; else echo \"Failed to copy docker-compose.yaml to ${aws_instance.docker-compose.0.private_ip}\"; fi",
 
-	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/run_docker-compose.yaml",
+	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/service_docker-compose.yaml",
+	      "if [ $? -eq 0 ]; then echo \"Successfully created nextcloud.service at ${aws_instance.docker-compose.0.private_ip}\"; else echo \"Failed to add nextcloud.service at ${aws_instance.docker-compose.0.private_ip}\"; fi",
+
+	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/up_docker-compose.yaml",
 	      "if [ $? -eq 0 ]; then echo \"Successfully started containers at ${aws_instance.docker-compose.0.private_ip}\"; else echo \"Failed to start containers at ${aws_instance.docker-compose.0.private_ip}\"; fi",
 
 #	      "git remote set-url origin git@github.com:ostasevych/tf-nc.git",
