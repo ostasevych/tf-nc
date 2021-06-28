@@ -55,7 +55,7 @@ services:
   nextcloud-app:
     image: nextcloud:latest
     container_name: nextcloud-app
-    env_file: hosts.env
+    env_file: virtual_host.env
     networks:
       - nextcloud_network
     depends_on:
