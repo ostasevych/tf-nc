@@ -8,7 +8,7 @@
   tasks:
 
   - name: Run containers in docker-compose
-    become: true
+    become: false
     shell:
       cmd: "docker-compose -f docker-compose.yaml stop"
       chdir: /opt/docker

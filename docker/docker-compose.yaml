@@ -74,12 +74,5 @@ services:
       - LETSENCRYPT_EMAIL=root@${VIRTUAL_HOST}
     restart: unless-stopped
 
-#  nextcloud_app_first_run:
-#    image: nextcloud:latest
-#    depends_on:
-#      - nextcloud-app
-#    restart: "no"
-#    entrypoint: [ "bash", "-c", "php occ maintenance:install --database ${DB_TYPE} --database-host ${DB_HOST} --database-name ${MYSQL_DATABASE} --database-user ${MYSQL_USER} --database-pass ${MYSQL_PASSWORD} --admin-user ${ADMIN_USER} --admin-pass ${ADMIN_PASSWORD} --data-dir /var/www/html/data" ]
-
 networks:
   nextcloud_network:
