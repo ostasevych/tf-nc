@@ -8,7 +8,7 @@
   tasks:
 
   - name: Run containers in docker-compose
-#    become: true
+    become: true
     shell:
       cmd: "VIRTUAL_HOST={{ virtual_host }} docker-compose up -d"
       chdir: /opt/docker
