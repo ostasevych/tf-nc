@@ -53,7 +53,7 @@ services:
     restart: always
 
   nextcloud-app:
-    image: nextcloud:latest
+    image: nextcloud:21
     container_name: nextcloud-app
     networks:
       - nextcloud_network
@@ -61,12 +61,15 @@ services:
       - letsencrypt
       - nginx-proxy
       - mysql
+    ports:
+      - 80:80
     volumes:
-      - /data/nextcloud/app/html:${APP_PATH}
-      - /data/nextcloud/app/config:${APP_PATH}/config
-      - /data/nextcloud/app/custom_apps:${APP_PATH}/custom_apps
-      - /data/nextcloud/app/data:${APP_PATH}/data
-      - /data/nextcloud/app/themes:${APP_PATH}/themes
+      - /data/nextcloud/app/html:/var/www/html
+#      - /data/nextcloud/app/html:${APP_PATH}
+#      - /data/nextcloud/app/config:${APP_PATH}/config
+#      - /data/nextcloud/app/custom_apps:${APP_PATH}/custom_apps
+#      - /data/nextcloud/app/data:${APP_PATH}/data
+#      - /data/nextcloud/app/themes:${APP_PATH}/themes
       - /etc/localtime:/etc/localtime:ro
     environment:
       - VIRTUAL_HOST=${VIRTUAL_HOST}
