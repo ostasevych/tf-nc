@@ -20,7 +20,7 @@
         [Service]
         Type=oneshot
         RemainAfterExit=true
-        WorkingDirectory=/home/ubuntu/docker
+        WorkingDirectory=/opt/docker
         ExecStart=docker-compose up -d --remove-orphans
         ExecStop=docker-compose down
         [Install]

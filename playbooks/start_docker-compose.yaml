@@ -10,7 +10,5 @@
   - name: Run containers in docker-compose
     become: true
     shell:
-#      cmd: "VIRTUAL_HOST=`host $(curl -s 169.254.169.254/2009-04-04/meta-data/public-ipv4) | cut -d' ' -f 5 | sed 's/.$//'` docker-compose -f ~/docker/docker-compose.yaml up -d"
-      cmd: "VIRTUAL_HOST=`host $(curl -s 169.254.169.254/2009-04-04/meta-data/public-ipv4) | cut -d' ' -f 5 | sed 's/.$//'` docker-compose up -d"
-#      cmd: "docker-compose up -d"
+      cmd: "docker-compose start"
       chdir: /home/ubuntu/docker
