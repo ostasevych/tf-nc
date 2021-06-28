@@ -36,6 +36,7 @@ services:
   mysql:
     image: mariadb
     container_name: nextcloud-mysql
+    env_file: credentials.env
     networks:
       - nextcloud_network
     ports:
@@ -46,10 +47,10 @@ services:
       - /data/nextcloud/mysql:/var/lib/mysql
       - /etc/localtime:/etc/localtime:ro
     environment:
-      - MYSQL_ROOT_PASSWORD=r@@t
-      - MYSQL_PASSWORD=p@ssw0rd
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
     restart: always
 
   nextcloud-app:
@@ -63,11 +64,11 @@ services:
       - nginx-proxy
       - mysql
     volumes:
-      - /data/nextcloud/app/html:/var/www/html
-      - /data/nextcloud/app/config:/var/www/html/config
-      - /data/nextcloud/app/custom_apps:/var/www/html/custom_apps
-      - /data/nextcloud/app/data:/var/www/html/data
-      - /data/nextcloud/app/themes:/var/www/html/themes
+      - /data/nextcloud/app/html:${APP_PATH}
+      - /data/nextcloud/app/config:${APP_PATH}/config
+      - /data/nextcloud/app/custom_apps:${APP_PATH}/custom_apps
+      - /data/nextcloud/app/data:${APP_PATH}/data
+      - /data/nextcloud/app/themes:${APP_PATH}/themes
       - /etc/localtime:/etc/localtime:ro
     environment:
       - VIRTUAL_HOST=${VIRTUAL_HOST}
@@ -77,10 +78,11 @@ services:
 
   nextcloud_app_first_run:
     image: nextcloud:latest
+    env_file: credentials.env
     depends_on:
       - nextcloud-app
     restart: "no"
-    entrypoint: [ "bash", "-c", "php occ maintenance:install --database mysql --database-host mysql --database-name nextcloud --database-user nextcloud --database-pass p@ssw0rd --admin-user admin --admin-pass r00t --data-dir /var/www/html/data" ]
+    entrypoint: [ "bash", "-c", "php occ maintenance:install --database ${DB_TYPE} --database-host ${DB_HOST} --database-name ${MYSQL_DATABASE} --database-user ${MYSQL_USER} --database-pass ${MYSQL_PASSWORD} --admin-user ${ADMIN_USER} --admin-pass ${ADMIN_PASSWORD} --data-dir /var/www/html/data" ]
 
 networks:
   nextcloud_network:

@@ -17,7 +17,17 @@
       src: ~/tf-nc/docker/docker-compose.yaml
       dest: /opt/docker
 
-  - name: Create hosts.env
+  - name: Copying credentials.env
+    copy:
+      src: ~/tf-nc/docker/credentials.env
+      dest: /opt/docker
+
+  - name: Copying virtual_host.env
+    copy:
+      src: ~/tf-nc/docker/virtual_host.env
+      dest: /opt/docker
+
+  - name: Append virtual_host.env with public dns host name
     shell:
-      cmd: 'echo VIRTUAL_HOST=\"{{ virtual_host }}\" > virtual_host.env'
+      cmd: 'echo VIRTUAL_HOST=\"{{ virtual_host }}\" >> virtual_host.env'
       chdir: /opt/docker
