@@ -61,8 +61,6 @@ services:
       - letsencrypt
       - nginx-proxy
       - mysql
-    ports:
-      - 80:80
     volumes:
       - /data/nextcloud/app/html:/var/www/html
 #      - /data/nextcloud/app/html:${APP_PATH}
