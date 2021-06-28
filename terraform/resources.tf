@@ -416,6 +416,10 @@ resource "aws_instance" "terraform-ci" {
 	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/up_docker-compose.yaml",
 	      "if [ $? -eq 0 ]; then echo \"Successfully started containers at ${aws_instance.docker-compose.0.private_ip}\"; else echo \"Failed to start containers at ${aws_instance.docker-compose.0.private_ip}\"; fi",
 
+	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/init_nc.yaml",
+	      "if [ $? -eq 0 ]; then echo \"Successfully initialised Nextcloud app! Login: admin; password: r@@t. Change them after logging in.\"; else echo \"Failed to initialise Nextcloud app\"; fi",
+
+
 #	      "git remote set-url origin git@github.com:ostasevych/tf-nc.git",
 #	      "echo \"Switched GitHub origin to ssh\""
 ]

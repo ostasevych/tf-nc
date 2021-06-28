@@ -1,0 +1,14 @@
+---
+- hosts: all
+  vars_files:
+  - vars/credentials.yaml
+  - vars/external_vars.yaml
+
+  tasks:
+  - name: first occ init
+    shell: |
+      docker exec -u 33 nextcloud-app sh -l -c "php occ maintenance:install --database {{ DB_TYPE }} --database-host {{ DB_HOST }} --database-name {{ DB_NAME }} --database-user {{ DB_USER }} --database-pass {{ DB_PASS }} --admin-user {{ ADMIN_USER }} --admin-pass {{ ADMIN_PASS }} --data-dir {{ APP_PATH }}"
+      docker exec -u 33 nextcloud-app sh -l -c "php occ config:system:set trusted_domains 2 --value={{ virtual_host }}"
+    register: oc_init
+
+  - debug: msg="{{ oc_init.stdout }}"

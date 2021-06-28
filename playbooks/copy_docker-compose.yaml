@@ -19,15 +19,10 @@
 
   - name: Copying credentials.env
     copy:
-      src: ~/tf-nc/docker/credentials.env
+      src: ~/tf-nc/docker/.env
       dest: /opt/docker
 
-  - name: Copying virtual_host.env
-    copy:
-      src: ~/tf-nc/docker/virtual_host.env
-      dest: /opt/docker
-
-  - name: Append virtual_host.env with public dns host name
+  - name: Appending env-file with public dns host name
     shell:
-      cmd: 'echo VIRTUAL_HOST=\"{{ virtual_host }}\" >> virtual_host.env'
+      cmd: 'echo VIRTUAL_HOST=\"{{ virtual_host }}\" >> .env'
       chdir: /opt/docker
