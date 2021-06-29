@@ -11,7 +11,10 @@
   tasks:
   - name: list /var/www/html
 #    become: true
-    shell: docker exec -it -u 33 nextcloud-app ls {{ APP_PATH }}
+    shell: |
+      docker exec -it -u 33 nextcloud-app ls -la {{ APP_PATH }}
+      sleep 2m
+      docker exec -it -u 33 nextcloud-app ls -la {{ APP_PATH }}
     register: app_ls
 
   - debug: msg="{{ app_ls.stdout }}"
