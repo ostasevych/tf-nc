@@ -53,7 +53,7 @@ services:
     restart: always
 
   nextcloud-app:
-    image: nextcloud:18
+    image: nextcloud:latest
     container_name: nextcloud-app
     networks:
       - nextcloud_network
