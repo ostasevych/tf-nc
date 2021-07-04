@@ -59,6 +59,7 @@ services:
       - nextcloud_network
     volumes:
       - redis:/var/lib/redis
+      - /data/nextcloud/redis:/var/lib/redis
 
   nextcloud-app:
     image: nextcloud:latest

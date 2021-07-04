@@ -3,7 +3,7 @@
   vars_files:
   - vars/credentials.yaml
   - vars/external_vars.yaml
-  - vars/app_vars.yaml
+  - vars/nc_vars.yaml
 
   tasks:
   - name: First occ init, create admin user

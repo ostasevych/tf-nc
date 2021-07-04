@@ -1,0 +1,14 @@
+---
+- hosts: all
+  vars_files:
+  - vars/external_vars.yaml
+  - vars/nc_vars.yaml
+
+  - name: Install NC apps
+    become: true
+    command: "{{ item }}"
+    loop:
+      - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ config:system:set trusted_domains 2 --value={{ virtual_host }}
+    register: install_nc-apps
+
+#  - debug: msg="{{ trusted_add.stdout }}"
