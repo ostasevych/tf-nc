@@ -15,11 +15,11 @@
 
   - debug: msg="{{ files_external_enable.stdout }}"
 
-  - name: Check, mount, validate, check parameters, start indexing S3 on Nextcloud as external_S3 mountpoint
+  - name: Check S3 is supported, mount, validate, check parameters, start indexing S3 on Nextcloud as external_S3 mountpoint
     become: true
     command: chdir={{ APP_PATH }}
     with items:
-      - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ files_external:backends storage amazons3- docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ files_external:backends storage amazons3
+      - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ files_external:backends storage amazons3
       - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ files_external:create -c bucket={{ bucket_name }} -c region={{ aws_region }} -c use_ssl=true -c use_path_style=true -c legacy_auth=false -c key={{ aws_key }} -c secret={{ aws_secret }} external_S3 amazons3 amazons3::accesskey
       - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ files_external:verify 7
       - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ files_external:list
