@@ -1,6 +1,5 @@
 ---
 - hosts: all
-  become: true
   vars_files:
   - vars/credentials.yaml
   - vars/external_vars.yaml
@@ -9,8 +8,8 @@
   - name: First occ init, create admin user
     become: true
     command: chdir=~
-    with items:
-    - ./sleep 2m
+    with_items:
+    - sleep 2m
     - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ maintenance:install --database {{ DB_TYPE }} --database-host {{ DB_HOST }} --database-name {{ DB_NAME }} --database-user {{ DB_USER }} --database-pass {{ DB_PASS }} --admin-user {{ ADMIN_USER }} --admin-pass {{ ADMIN_PASS }} --data-dir {{ APP_PATH }}/data
     register: occ_init
 
