@@ -1,0 +1,24 @@
+---
+- hosts: all
+  vars_files:
+  - vars/external_vars.yaml
+  - var/s3_vars.yaml
+
+  tasks:
+  - name: Enable files_external app
+    become: true
+    command: chdir={{ APP_PATH }}
+    with_items:
+    - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ app:enable files_external
+    register: files_external_enable
+
+  - debug: msg="{{ files_external_enable.stdout }}"
+
+  - name: Mount S3 on Nextcloud as external_S3 mountpoint
+    become: true
+    command: chdir={{ APP_PATH }}
+    with items:
+    - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ occ files_external:create -c bucket={{ bucket_name }} -c region={{ aws_regions }} -c use_ssl=true -c use_path_style=true -c legacy_auth=false -c key={{ aws_key }} -c secret={{ aws_secret }} external_S3 amazons3 amazons3::accesskey
+    register: s3_add
+
+  - debug: msg="{{ s3_add.stdout }}"
