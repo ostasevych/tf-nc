@@ -52,6 +52,14 @@ services:
       - MYSQL_USER=${MYSQL_USER}
     restart: always
 
+  redis:
+    image: redis:latest
+    restart: always
+    networks:
+      - nextcloud_network
+    volumes:
+      - redis:/var/lib/redis
+
   nextcloud-app:
     image: nextcloud:latest
     container_name: nextcloud-app
@@ -61,6 +69,7 @@ services:
       - letsencrypt
       - nginx-proxy
       - mysql
+      - redis
     volumes:
       - /data/nextcloud/app/html:${APP_PATH}
       - /data/nextcloud/app/config:${APP_PATH}/config
@@ -72,6 +81,7 @@ services:
       - VIRTUAL_HOST=${VIRTUAL_HOST}
       - LETSENCRYPT_HOST=${VIRTUAL_HOST}
       - LETSENCRYPT_EMAIL=root@${VIRTUAL_HOST}
+      - REDIS_HOST=redis
     restart: unless-stopped
 
 networks:
