@@ -10,7 +10,7 @@
     become: true
     command: chdir={{ APP_PATH }}
     with_items:
-    - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ app:enable files_external
+      - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ app:enable files_external
     register: files_external_enable
 
   - debug: msg="{{ files_external_enable.stdout }}"
@@ -19,11 +19,11 @@
     become: true
     command: chdir={{ APP_PATH }}
     with items:
-    - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ files_external:backends storage amazons3- docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ files_external:backends storage amazons3
-    - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ files_external:create -c bucket={{ bucket_name }} -c region={{ aws_region }} -c use_ssl=true -c use_path_style=true -c legacy_auth=false -c key={{ aws_key }} -c secret={{ aws_secret }} external_S3 amazons3 amazons3::accesskey
-    - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ files_external:verify 7
-    - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ files_external:list
-    - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ files:scan -vvv --path /admin/files/external_S3
+      - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ files_external:backends storage amazons3- docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ files_external:backends storage amazons3
+      - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ files_external:create -c bucket={{ bucket_name }} -c region={{ aws_region }} -c use_ssl=true -c use_path_style=true -c legacy_auth=false -c key={{ aws_key }} -c secret={{ aws_secret }} external_S3 amazons3 amazons3::accesskey
+      - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ files_external:verify 7
+      - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ files_external:list
+      - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ files:scan -vvv --path /admin/files/external_S3
     register: s3_add
 
   - debug: msg="{{ s3_add.stdout }}"
