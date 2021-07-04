@@ -13,7 +13,8 @@
       - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ app:enable files_external
     register: files_external_enable
 
-  - debug: msg="{{ files_external_enable.stdout }}"
+  - name: Show the value of output of enabling files_external app
+    debug: msg="{{ files_external_enable.stdout }}"
 
   - name: Check S3 is supported, mount, validate, check parameters, start indexing S3 on Nextcloud as external_S3 mountpoint
     become: true
@@ -26,4 +27,5 @@
       - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ files:scan -vvv --path /admin/files/external_S3
     register: s3_add
 
-  - debug: msg="{{ s3_add.stdout }}"
+  - name: Show the value of output of adding s3 bucket
+    debug: msg="{{ s3_add.stdout }}"
