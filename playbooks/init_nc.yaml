@@ -14,8 +14,7 @@
       - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ maintenance:install --database {{ DB_TYPE }} --database-host {{ DB_HOST }} --database-name {{ DB_NAME }} --database-user {{ DB_USER }} --database-pass {{ DB_PASS }} --admin-user {{ ADMIN_USER }} --admin-pass {{ ADMIN_PASS }} --data-dir {{ APP_PATH }}/data
     register: occ_init
 
-  - name: Show the value of output of initialisation
-    debug: msg="{{ occ_init.stdout }}"
+  - debug: msg="{{ occ_init.stdout }}"
 
   - name: Add current trusted domain
     become: true
@@ -24,5 +23,4 @@
       - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ config:system:set trusted_domains 2 --value={{ virtual_host }}
     register: trusted_add
 
-  - name: Show the value of output of adding trusted domain
-    debug: msg="{{ trusted_add.stdout }}"
+  - debug: msg="{{ trusted_add.stdout }}"
