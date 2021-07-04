@@ -1,0 +1,32 @@
+---
+- hosts: all
+  vars_files:
+  - vars/external_vars.yaml
+  - vars/nc_vars.yaml
+
+  - name: Install NC apps
+    become: true
+    command: "{{ item }}"
+    loop:
+      - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ app:install {{ apps_install }}
+    register: install_nc-apps
+
+#  - debug: msg="{{ install_nc-apps.stdout }}"
+
+  - name: Remove NC apps
+    become: true
+    command: "{{ item }}"
+    loop:
+      - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ app:remove {{ apps_remove }}
+    register: remove_nc-apps
+
+#  - debug: msg="{{ remove_nc-apps.stdout }}"
+
+  - name: Update NC apps
+    become: true
+    command: "{{ item }}"
+    loop:
+      - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ app:update {{ apps_update }}
+    register: update_nc-apps
+
+#  - debug: msg="{{ update_nc-apps.stdout }}"

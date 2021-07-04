@@ -1,1 +1,4 @@
-APP_PATH: /var/www/html
+apps_install:
+apps_remove:
+apps_enable:
+apps_disable:

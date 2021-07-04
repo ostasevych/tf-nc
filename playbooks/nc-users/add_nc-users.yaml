@@ -8,7 +8,7 @@
     become: true
     command: "{{ item }}"
     loop:
-      - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ config:system:set trusted_domains 2 --value={{ virtual_host }}
+      - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ app:install {{ list_apps }}
     register: install_nc-apps
 
-#  - debug: msg="{{ trusted_add.stdout }}"
+#  - debug: msg="{{ install_nc-apps.stdout }}"
