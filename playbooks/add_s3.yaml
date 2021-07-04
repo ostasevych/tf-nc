@@ -2,7 +2,8 @@
 - hosts: all
   vars_files:
   - vars/external_vars.yaml
-  - var/s3_vars.yaml
+  - vars/s3_vars.yaml
+  - vars/app_vars.yaml
 
   tasks:
   - name: Enable files_external app
