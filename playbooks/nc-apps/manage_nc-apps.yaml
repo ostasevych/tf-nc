@@ -66,7 +66,7 @@
     become: true
     command: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ app:remove {{ item }}
     with_items: "{{ list_apps_remove }}"
-#    when: (list_apps_install is defined) and (list_apps_install != None) and (list_apps_install != list_apps_remove)
+#    when: (list_apps_remove is defined) and (list_apps_remove != None) and (list_apps_remove != list_apps_install)
     ignore_errors: true
     register: remove_nc_apps
 
