@@ -10,12 +10,12 @@
 
   - name: Create the list of users to add
     set_fact:
-      list_users_add: "{{ users_install.split(',') }}"
+      list_users_add: "{{ users_add.split(',') }}"
     ignore_errors: true
 
-  - name: Create the list of users to remove
+  - name: Create the list of users to delete
     set_fact:
-      list_user_remove: "{{ users_remove.split(',') }}"
+      list_users_delete: "{{ users_delete.split(',') }}"
     ignore_errors: true
 
 
@@ -30,10 +30,14 @@
       list_users_disable: "{{ users_disable.split(',') }}"
     ignore_errors: true
 
-  - name: Add NC users, but not enable
+###        docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ user:add --password-from-env "{{ item }}"
 
+
+
+  - name: Add NC users, but not enable
     become: true
-    command: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ app:add --keep-disabled {{ item }}
+#      password: "{{ lookup('password', length=8') }}"
+    command: docker exec -it -u 33 nextcloud-app bash -c 'OC_PASS="{{ lookup('password','/dev/null length=8') }}" && export OC_PASS && {{ APP_PATH }}/occ user:add --password-from-env "{{ item }}"'
     with_items: "{{ list_users_add }}"
 #    when: (list_users_add is defined) and (list_users_add != None)
     ignore_errors: true
@@ -43,7 +47,7 @@
 
   - name: Enable NC users
     become: true
-    command: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ user:delete {{ item }}
+    command: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ user:delete "{{ item }}"
     with_items: "{{ list_users_enable }}"
 #    when: (list_users_enable is defined) and (list_users_enable != None)
     ignore_errors: true
@@ -53,7 +57,7 @@
 
   - name: Disable NC users
     become: true
-    command: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ user:disable {{ item }}
+    command: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ user:disable "{{ item }}"
     with_items: "{{ list_users_disable }}"
 #    when: (list_users_disable is defined) and (list_users_disable != None)
     ignore_errors: true
@@ -62,13 +66,13 @@
 #  - debug: msg="{{ disable_nc_apps.stdout }}"
 
 
-  - name: Remove NC apps
+  - name: Delete NC users
     become: true
-    command: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ app:remove {{ item }}
-    with_items: "{{ list_users_remove }}"
-#    when: (list_users_remove is defined) and (list_users_remove != None)
+    command: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ user:delete "{{ item }}"
+    with_items: "{{ list_users_delete }}"
+#    when: (list_users_delete is defined) and (list_users_delete != None)
     ignore_errors: true
-    register: remove_nc_users
+    register: delete_nc_users
 
 
-#  - debug: msg="{{ remove_nc_apps.stdout }}"
+#  - debug: msg="{{ delete_nc_users.stdout }}"
