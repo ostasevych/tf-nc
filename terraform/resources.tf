@@ -396,6 +396,7 @@ resource "aws_instance" "terraform-ci" {
 	      "if [ $? -eq 0 ]; then echo \"Successfully cloned git with the configuration\"; else echo \"Failed to clone git\"; fi",
 
 	      "echo \"virtual_host: ${aws_instance.docker-compose.0.public_dns}\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
+	      "echo \"virtual_host_ip: ${aws_instance.docker-compose.0.public_ip}\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
 	      "echo \"aws_host: s3.${var.region}.amazonaws.com\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
 	      "echo \"aws_bucket: ${var.name_prefix}-nc-data\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
 	      "echo \"aws_region: ${var.region}\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",

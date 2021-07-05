@@ -29,12 +29,12 @@ output "ci_ssh_connect" {
   value       = "ssh -i ${var.PRIVATE_KEY_PATH} ${var.ansible_user}@${aws_instance.terraform-ci.0.public_ip}"
 }
 
-
 output "url-jenkins" {
   value = "http://${aws_instance.terraform-ci.0.public_ip}:8080"
 }
 
-output "url-docker" {
-  value = "http://${aws_instance.docker-compose.0.public_ip}"
+output "url-webapp" {
+  description = "List of public DNS names assigned to the instances. For EC2-VPC, this is only available if you've enabled DNS hostnames for your VPC"
+  value       = "http://${aws_instance.docker-compose.0.public_dns}"
 }
- 
+

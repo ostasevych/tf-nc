@@ -1,9 +1,9 @@
 version: '3'
 services:
   nginx-proxy:
-    image: jwilder/nginx-proxy
-#    labels:
-#      - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy=true"
+    image: jwilder/nginx-proxy:alpine
+    labels:
+      - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy=true"
     container_name: nextcloud-proxy
     networks:
       - nextcloud_network
@@ -13,33 +13,25 @@ services:
     volumes:
       - /data/nextcloud/nginx/vhost.d:/etc/nginx/vhost.d:rw
       - /data/nextcloud/nginx/html:/usr/share/nginx/html:rw
-      - /data/nextcloud/nginx/certs:/etc/nginx/certs
+      - /data/nextcloud/nginx/certs:/etc/nginx/certs:ro
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/tmp/docker.sock:ro
     restart: always
 
-#  letsencrypt:
-#    image: jrcs/letsencrypt-nginx-proxy-companion
-#    container_name: nextcloud-letsencrypt
-#    depends_on:
-#      - nginx-proxy
-#    networks:
-#      - nextcloud_network
-#    volumes:
-#      - /data/nextcloud/nginx/vhost.d:/etc/nginx/vhost.d:rw
-#      - /data/nextcloud/nginx/html:/usr/share/nginx/html:rw
-#      - /data/nextcloud/nginx/certs:/etc/nginx/certs:rw
-#      - /etc/localtime:/etc/localtime:ro
-#      - /var/run/docker.sock:/var/run/docker.sock:ro
-#    restart: unless-stopped
-
-  proxy-companion:
-    container_name: proxy-companion
-    restart: always
-    image: sebastienheyd/self-signed-proxy-companion
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: nextcloud-letsencrypt
+    depends_on:
+      - nginx-proxy
+    networks:
+      - nextcloud_network
     volumes:
+      - /data/nextcloud/nginx/vhost.d:/etc/nginx/vhost.d:rw
+      - /data/nextcloud/nginx/html:/usr/share/nginx/html:rw
+      - /data/nextcloud/nginx/certs:/etc/nginx/certs:rw
+      - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /data/nextcloud/nginx/certs:/etc/nginx/certs
+    restart: unless-stopped
 
   mysql:
     image: mariadb
@@ -74,7 +66,7 @@ services:
     networks:
       - nextcloud_network
     depends_on:
-#      - letsencrypt
+      - letsencrypt
       - nginx-proxy
       - mysql
       - redis
@@ -84,13 +76,11 @@ services:
       - /data/nextcloud/app/custom_apps:${APP_PATH}/custom_apps
       - /data/nextcloud/app/data:${APP_PATH}/data
       - /data/nextcloud/app/themes:${APP_PATH}/themes
-      - /data/nextcloud/nginx/certs:/etc/nginx/certs
       - /etc/localtime:/etc/localtime:ro
     environment:
       - VIRTUAL_HOST=${VIRTUAL_HOST}
-#      - LETSENCRYPT_HOST=${VIRTUAL_HOST}
-#      - LETSENCRYPT_EMAIL=root@${VIRTUAL_HOST}
-      - SELF_SIGNED_HOST=${VIRTUAL_HOST}
+      - LETSENCRYPT_HOST=${VIRTUAL_HOST}
+      - LETSENCRYPT_EMAIL=root@${VIRTUAL_HOST}
       - REDIS_HOST=redis
       - OBJECTSTORE_S3_HOST=${OBJECTSTORE_S3_HOST}
       - OBJECTSTORE_S3_BUCKET=${OBJECTSTORE_S3_BUCKET}
@@ -99,20 +89,6 @@ services:
       - OBJECTSTORE_S3_REGION=${OBJECTSTORE_S3_REGION}
       - OBJECTSTORE_S3_SSL=true
     restart: unless-stopped
-
-#  office:
-#    image: collabora/code
-#    container_name: office
-#    networks:
-#      - nextcloud_network
-#    expose:
-#      - 9980
-#    cap_add:
-#      - MKNOD
-#    environment:
-#      - domain=${VIRTUAL_HOST}
-#      - VIRTUAL_HOST=office.${VIRTUAL_HOST}
-#    restart: unless-stopped
 
 networks:
   nextcloud_network:

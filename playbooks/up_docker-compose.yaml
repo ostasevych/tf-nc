@@ -10,5 +10,5 @@
   - name: Run containers in docker-compose
     become: true
     shell:
-      cmd: "VIRTUAL_HOST={{ virtual_host }} docker-compose up -d"
+      cmd: "VIRTUAL_HOST={{ virtual_host }} docker-compose up -d --remove-orphans"
       chdir: /opt/docker
