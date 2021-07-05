@@ -1,4 +1,4 @@
-apps_install:
+apps_install: tasks,calendar,files_external
 apps_remove:
-apps_enable:
+apps_enable: tasks,calendar,files_external
 apps_disable:
