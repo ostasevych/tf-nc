@@ -396,7 +396,12 @@ resource "aws_instance" "terraform-ci" {
 	      "if [ $? -eq 0 ]; then echo \"Successfully cloned git with the configuration\"; else echo \"Failed to clone git\"; fi",
 
 	      "echo \"virtual_host: ${aws_instance.docker-compose.0.public_dns}\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
-	      "if [ $? -eq 0 ]; then echo \"Public host name has been successfully sent to ansible virtual_host variable at external_vars.yaml\"; else echo \"Failed to store virtual_host variable at ansible external_vars.yaml \"; fi",
+	      "echo \"aws_host: s3.${var.region}.amazonaws.com\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
+	      "echo \"aws_bucket: ${var.name_prefix}-nc-data\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
+	      "echo \"aws_region: ${var.region}\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
+	      "echo \"aws_key: ${var.key}\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
+	      "echo \"aws_secret: ${var.secret}\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
+	      "if [ $? -eq 0 ]; then echo \"Public host name and S3 variables have been successfully sent to ansible virtual_host variable at external_vars.yaml\"; else echo \"Failed to store virtual_host and S3 variables at ansible external_vars.yaml \"; fi",
 
 	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/install_java.yaml",
 	      "if [ $? -eq 0 ]; then echo \"Java OpenJDK installed successfully\"; else echo \"Failed to install Java OpenJDK\"; fi",

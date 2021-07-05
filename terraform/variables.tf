@@ -6,12 +6,20 @@ variable "name_prefix" {
   default = "nextcloud"
 }
 
+variable "region" {
+  default = "eu-west-1"
+}
+
 variable "kms_manager" {
   default = "terraform"
 }
 
-variable "region" {
-  default = "eu-west-1"
+variable "key" {
+  default = "XXXXXXXXXXXXXXXXXXXX"
+}
+
+variable "secret" {
+  default = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 }
 
 variable "instance" {
