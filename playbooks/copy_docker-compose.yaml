@@ -22,7 +22,17 @@
       src: ~/tf-nc/docker/.env
       dest: /opt/docker
 
-  - name: Appending env-file with public dns host name
+  - name: Appending env-file of docker-compose with public dns host name
     shell:
       cmd: 'echo VIRTUAL_HOST=\"{{ virtual_host }}\" >> .env'
+      chdir: /opt/docker
+
+  - name: Exporting S3 variables to docker-compose env-file
+    shell:
+      cmd: | 
+        echo OBJECTSTORE_S3_HOST=\"{{ aws_host }}\" >> .env'
+        echo OBJECTSTORE_S3_BUCKET=\"{{ aws_bucket }}\" >> .env'
+        echo OBJECTSTORE_S3_REGION=\"{{ aws_region }}\" >> .env'
+        echo OBJECTSTORE_S3_KEY=\"{{ aws_key }}\" >> .env'
+        echo OBJECTSTORE_S3_SECRET=\"{{ aws_secret }}\" >> .env'
       chdir: /opt/docker
