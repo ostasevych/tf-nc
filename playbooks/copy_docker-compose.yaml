@@ -30,9 +30,9 @@
   - name: Exporting S3 variables to docker-compose env-file
     shell:
       cmd: | 
-        echo OBJECTSTORE_S3_HOST=\"{{ aws_host }}\" >> .env'
-        echo OBJECTSTORE_S3_BUCKET=\"{{ aws_bucket }}\" >> .env'
-        echo OBJECTSTORE_S3_REGION=\"{{ aws_region }}\" >> .env'
-        echo OBJECTSTORE_S3_KEY=\"{{ aws_key }}\" >> .env'
-        echo OBJECTSTORE_S3_SECRET=\"{{ aws_secret }}\" >> .env'
+        echo OBJECTSTORE_S3_HOST=\"{{ aws_host }}\" >> .env
+        echo OBJECTSTORE_S3_BUCKET=\"{{ aws_bucket }}\" >> .env
+        echo OBJECTSTORE_S3_REGION=\"{{ aws_region }}\" >> .env
+        echo OBJECTSTORE_S3_KEY=\"{{ aws_key }}\" >> .env
+        echo OBJECTSTORE_S3_SECRET=\"{{ aws_secret }}\" >> .env
       chdir: /opt/docker
