@@ -16,7 +16,7 @@
 
 #  - debug: msg="{{ occ_init.stdout }}"
 
-- name: Set configurations files
+  - name: Set configurations files
     become: true
     shell: |
       docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ config:system:set trusted_domains 1 --value={{ virtual_host_ip }}
