@@ -1,10 +1,10 @@
 version: '3'
 services:
-  nginx-proxy:
+  proxy:
     image: jwilder/nginx-proxy
 #    labels:
 #      - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy=true"
-    container_name: nextcloud-proxy
+    container_name: proxy
     networks:
       - nextcloud_network
     ports:
@@ -22,7 +22,7 @@ services:
 #    image: jrcs/letsencrypt-nginx-proxy-companion
 #    container_name: nextcloud-letsencrypt
 #    depends_on:
-#      - nginx-proxy
+#      - proxy
 #    networks:
 #      - nextcloud_network
 #    volumes:
@@ -76,7 +76,7 @@ services:
     depends_on:
 #      - letsencrypt
       - proxy-companion
-      - nginx-proxy
+      - proxy
       - mysql
       - redis
     volumes:
