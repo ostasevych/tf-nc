@@ -16,7 +16,7 @@
 
 #  - debug: msg="{{ occ_init.stdout }}"
 
-  - name: Set configurations files
+  - name: Adding variables to config.php file
     become: true
     shell: |
       docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ config:system:set trusted_domains 1 --value={{ virtual_host_ip }}
@@ -27,5 +27,9 @@
       docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ db:add-missing-indices
     register: set_config
 
-
 #  - debug: msg="{{ set_config.stdout }}"
+
+ - name: Hacking .htaccess to fix .well-known issue on self-signed host
+    become: true
+    command: sed -i 's+/remote.php/dav+https://%{SERVER_NAME}/remote.php/dav+g' /data/nextcloud/app/html/.htaccess
+    register: set_well_known
