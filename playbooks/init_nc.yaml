@@ -29,7 +29,7 @@
 
 #  - debug: msg="{{ set_config.stdout }}"
 
- - name: Hacking .htaccess to fix .well-known issue on self-signed host
+  - name: Hacking .htaccess to fix .well-known issue on self-signed host
     become: true
     command: sed -i 's+/remote.php/dav+https://%{SERVER_NAME}/remote.php/dav+g' /data/nextcloud/app/html/.htaccess
     register: set_well_known
