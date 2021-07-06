@@ -75,6 +75,7 @@ services:
       - nextcloud_network
     depends_on:
 #      - letsencrypt
+      - proxy-companion
       - nginx-proxy
       - mysql
       - redis
