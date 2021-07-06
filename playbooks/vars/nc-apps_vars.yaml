@@ -1,4 +1,4 @@
 apps_install: tasks,calendar,files_external,documentserver_community,onlyofice
 apps_remove:
 apps_enable: tasks,calendar,files_external,documentserver_community,onlyofice
-apps_disable: federation,suppor,accessibility,survey_client
+apps_disable: federation,support,accessibility,survey_client,circles,dashboard
