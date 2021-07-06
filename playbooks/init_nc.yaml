@@ -23,7 +23,9 @@
       docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ config:system:set trusted_domains 2 --value={{ virtual_host }}
       docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ config:system:set filesystem_check_changes --value='0'
       docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ config:system:set overwrite.cli.url --value='https://{{ virtual_host }}'
+      docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ config:system:set overwriteprotocol --value='https:'
       docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ config:system:set default_phone_region --value='UA'
+      docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ config:system:set loglevel --value=2
       docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ db:add-missing-indices
     register: set_config
 

@@ -60,13 +60,13 @@ services:
       - MYSQL_USER=${MYSQL_USER}
     restart: always
 
-  redis:
-    image: redis:latest
-    restart: always
-    networks:
-      - nextcloud_network
-    volumes:
-      - /data/nextcloud/redis:/var/lib/redis
+#  redis:
+#    image: redis:latest
+#    restart: always
+#    networks:
+#      - nextcloud_network
+#    volumes:
+#      - /data/nextcloud/redis:/var/lib/redis
 
   nextcloud-app:
     image: nextcloud:latest
@@ -78,7 +78,7 @@ services:
       - proxy-companion
       - proxy
       - mysql
-      - redis
+#      - redis
     volumes:
       - /data/nextcloud/app/html:${APP_PATH}
       - /data/nextcloud/app/config:${APP_PATH}/config
@@ -92,7 +92,7 @@ services:
 #      - LETSENCRYPT_HOST=${VIRTUAL_HOST}
 #      - LETSENCRYPT_EMAIL=root@${VIRTUAL_HOST}
       - SELF_SIGNED_HOST=${VIRTUAL_HOST}
-      - REDIS_HOST=redis
+#      - REDIS_HOST=redis
       - OBJECTSTORE_S3_HOST=${OBJECTSTORE_S3_HOST}
       - OBJECTSTORE_S3_BUCKET=${OBJECTSTORE_S3_BUCKET}
       - OBJECTSTORE_S3_SECRET=${OBJECTSTORE_S3_SECRET}
