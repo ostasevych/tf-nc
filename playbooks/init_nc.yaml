@@ -35,3 +35,16 @@
     become: true
     command: sed -i 's+/remote.php/dav+https://%{SERVER_NAME}/remote.php/dav+g' /data/nextcloud/app/html/.htaccess
     register: set_well_known
+
+  - name: Installing Community Document Server and OnlyOffice connector
+    become: true
+    shell: |
+      curl -L -o /data/nextcloud/app/custom_apps/documentserver_community.tar.gz https://github.com/nextcloud/documentserver_community/releases/download/v0.1.10/documentserver_community.tar.gz
+      tar -zxf /data/nextcloud/app/custom_apps/documentserver_community.tar.gz
+      rm -f /data/nextcloud/app/custom_apps/documentserver_community.tar.gz
+      docker exec -it -u 33 nextcloud-app chown www-data:www-data {{ APP_PATH }}/custom_apps
+      docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ app:enable documentserver_community
+      docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ app:install onlyoffice
+    register: install_onlyoffice
+     
+#  - debug: msg="{{ install_onlyoffice.stdout }}"
