@@ -1,0 +1,78 @@
+---
+- hosts: all
+  gather_facts: false
+  vars_files:
+  - ../vars/external_vars.yaml
+  - ../vars/nc_vars.yaml
+  - ../vars/nc-users_vars.yaml
+
+  tasks:
+
+  - name: Create the list of users to add
+    set_fact:
+      list_users_add: "{{ users_add.split(',') }}"
+    ignore_errors: true
+
+  - name: Create the list of users to delete
+    set_fact:
+      list_users_delete: "{{ users_delete.split(',') }}"
+    ignore_errors: true
+
+
+  - name: Create the list of users to enable
+    set_fact:
+      list_users_enable: "{{ users_enable.split(',') }}"
+    ignore_errors: true
+
+
+  - name: Create the list of users to disable
+    set_fact:
+      list_users_disable: "{{ users_disable.split(',') }}"
+    ignore_errors: true
+
+###        docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ user:add --password-from-env "{{ item }}"
+
+
+
+  - name: Add NC users, but not enable
+    become: true
+#      password: "{{ lookup('password', length=8') }}"
+    command: docker exec -it -u 33 nextcloud-app bash -c 'OC_PASS="{{ lookup('password','/dev/null length=8') }}" && export OC_PASS && {{ APP_PATH }}/occ user:add --password-from-env "{{ item }}"'
+    with_items: "{{ list_users_add }}"
+#    when: (list_users_add is defined) and (list_users_add != None)
+    ignore_errors: true
+    register: add_nc_users
+
+#  - debug: msg="{{ install_nc_apps.stdout }}"
+
+  - name: Enable NC users
+    become: true
+    command: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ user:delete "{{ item }}"
+    with_items: "{{ list_users_enable }}"
+#    when: (list_users_enable is defined) and (list_users_enable != None)
+    ignore_errors: true
+    register: enable_nc_users
+
+#  - debug: msg="{{ enable_nc_apps.stdout }}"
+
+  - name: Disable NC users
+    become: true
+    command: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ user:disable "{{ item }}"
+    with_items: "{{ list_users_disable }}"
+#    when: (list_users_disable is defined) and (list_users_disable != None)
+    ignore_errors: true
+    register: disable_nc_users
+
+#  - debug: msg="{{ disable_nc_apps.stdout }}"
+
+
+  - name: Delete NC users
+    become: true
+    command: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ user:delete "{{ item }}"
+    with_items: "{{ list_users_delete }}"
+#    when: (list_users_delete is defined) and (list_users_delete != None)
+    ignore_errors: true
+    register: delete_nc_users
+
+
+#  - debug: msg="{{ delete_nc_users.stdout }}"
