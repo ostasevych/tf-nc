@@ -10,10 +10,9 @@
     become: true
     command: docker exec -it -u 33 nextcloud-app bash -c "{{item}}"
     with_items:
-      - cd {{ APP_PATH }}/custom_apps
-      - curl -L -o documentserver_community.tar.gz https://github.com/nextcloud/documentserver_community/releases/download/v0.1.10/documentserver_community.tar.gz
-      - tar -zxf documentserver_community.tar.gz
-      - rm -f documentserver_community.tar.gz
+      - curl -L -o {{ APP_PATH }}/custom_apps/documentserver_community.tar.gz https://github.com/nextcloud/documentserver_community/releases/download/v0.1.10/documentserver_community.tar.gz
+      - cd {{ APP_PATH }}/custom_apps && tar -zxvf documentserver_community.tar.gz
+      - rm -f {{ APP_PATH }}/custom_apps/documentserver_community.tar.gz
     register: download_cds
 
   - name: Install and enable Community Document Server and OnlyOffice connector
@@ -22,5 +21,6 @@
     with_items:
       - app:enable documentserver_community
       - app:install onlyoffice
+      - app:enable onlyoffice
       - config:system:set allow_local_remote_servers --value=true
     register: enable_cds_onlyoffice
