@@ -22,6 +22,11 @@
       src: ~/tf-nc/docker/.env
       dest: /opt/docker
 
+  - name: Copying custom_proxy_settings.conf
+    copy:
+      src: ~/tf-nc/docker/custom_proxy_settings.conf
+      dest: /opt/docker
+
   - name: Appending env-file of docker-compose with public dns host name
     shell:
       cmd: 'echo VIRTUAL_HOST=\"{{ virtual_host }}\" >> .env'
