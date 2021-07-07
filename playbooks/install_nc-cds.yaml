@@ -6,18 +6,21 @@
 
   tasks:
 
-  - name: Installing Community Document Server and OnlyOffice connector
+  - name: Download and untar Community Document Server
     become: true
-    shell: |
-      curl -L -o /data/nextcloud/app/custom_apps/documentserver_community.tar.gz https://github.com/nextcloud/documentserver_community/releases/download/v0.1.10/documentserver_community.tar.gz
-      cd /data/nextcloud/app/custom_apps
-      tar -zxf documentserver_community.tar.gz
-      rm -f documentserver_community.tar.gz
-      chown -R www-data:www-data documentserver_community/*
-      docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ app:enable documentserver_community
-      docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ app:install onlyoffice
-      docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ config:system:set allow_local_remote_servers --value=true
-    register: install_onlyoffice
-    ignore_errors: true
+    command: command: docker exec -it -u 33 nextcloud-app bash -c "{{item}}"
+    with_items:
+      - cd {{ APP_PATH }}/custom_apps
+      - curl -L -o documentserver_community.tar.gz https://github.com/nextcloud/documentserver_community/releases/download/v0.1.10/documentserver_community.tar.gz
+      - tar -zxf documentserver_community.tar.gz
+      - rm -f documentserver_community.tar.gz
+    register: download_cds
 
-  - debug: msg="{{ install_onlyoffice.stdout }}"
+  - name: Install and enable Community Document Server and OnlyOffice connector
+    become: true
+    command: command: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ
+    with_items:
+      - app:enable documentserver_community
+      - app:install onlyoffice
+      - config:system:set allow_local_remote_servers --value=true
+    register: enable_cds_onlyoffice
