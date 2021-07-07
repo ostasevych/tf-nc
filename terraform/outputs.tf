@@ -1,15 +1,15 @@
 output "dc_instance_public_ip" {
-  description = "Public IPs assigned to the Docker Compose EC2 instance"
+  description = "Public IPs assigned to the Application EC2 instance"
   value       = "${aws_instance.docker-compose.0.public_ip}"
 }
 
 output "dc_instance_private_ip" {
-  description = "Private IP assigned to the Docker Compose EC2 instance"
+  description = "Private IP assigned to the Application EC2 instance"
   value       = "${aws_instance.docker-compose.0.private_ip}"
 }
 
 output "dc_ssh_connect" {
-  description = "Use the following way to connect the Docker Compose EC2 instance"
+  description = "Use the following way to connect the Application EC2 instance"
   value       = "ssh -i ${var.PRIVATE_KEY_PATH} ${var.ansible_user}@${aws_instance.docker-compose.0.public_ip}"
 }
 
@@ -34,7 +34,7 @@ output "url-jenkins" {
 }
 
 output "url-webapp" {
-  description = "List of public DNS names assigned to the instances. For EC2-VPC, this is only available if you've enabled DNS hostnames for your VPC"
+  description = "Public DNS name assigned to the Application EC2 instance."
   value       = "http://${aws_instance.docker-compose.0.public_dns}"
 }
 

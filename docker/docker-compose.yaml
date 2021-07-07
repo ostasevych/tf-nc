@@ -16,7 +16,7 @@ services:
       - /data/nextcloud/nginx/certs:/etc/nginx/certs
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./custom_proxy.settings.conf:/etc/nginx/conf.d/custom_proxy_settings.conf:ro
+      - ./custom_proxy_settings.conf:/etc/nginx/conf.d/custom_proxy_settings.conf:ro
     restart: always
 
 #  letsencrypt:
