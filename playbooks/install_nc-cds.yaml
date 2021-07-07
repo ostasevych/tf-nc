@@ -8,7 +8,7 @@
 
   - name: Download and untar Community Document Server
     become: true
-    command: docker exec -d -u 33 nextcloud-app bash -c "{{item}}"
+    command: docker exec -it -u 33 nextcloud-app bash -c "{{item}}"
     with_items:
       - cd {{ APP_PATH }}/custom_apps
       - curl -L -o documentserver_community.tar.gz https://github.com/nextcloud/documentserver_community/releases/download/v0.1.10/documentserver_community.tar.gz
@@ -18,7 +18,7 @@
 
   - name: Install and enable Community Document Server and OnlyOffice connector
     become: true
-    command: docker exec -d -u 33 nextcloud-app {{ APP_PATH }}/occ {{item}}
+    command: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ {{item}}
     with_items:
       - app:enable documentserver_community
       - app:install onlyoffice

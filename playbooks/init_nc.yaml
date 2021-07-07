@@ -11,12 +11,12 @@
     command: "{{ item }}"
     loop:
       - sleep 2m
-      - docker exec -d -u 33 nextcloud-app {{ APP_PATH }}/occ maintenance:install --database {{ DB_TYPE }} --database-host {{ DB_HOST }} --database-name {{ DB_NAME }} --database-user {{ DB_USER }} --database-pass {{ DB_PASS }} --admin-user {{ ADMIN_USER }} --admin-pass {{ ADMIN_PASS }} --data-dir {{ APP_PATH }}/data
+      - docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ maintenance:install --database {{ DB_TYPE }} --database-host {{ DB_HOST }} --database-name {{ DB_NAME }} --database-user {{ DB_USER }} --database-pass {{ DB_PASS }} --admin-user {{ ADMIN_USER }} --admin-pass {{ ADMIN_PASS }} --data-dir {{ APP_PATH }}/data
     register: occ_init
 
   - name: Adding variables to config.php file
     become: true
-    command: docker exec -d -u 33 nextcloud-app {{ APP_PATH }}/occ {{item}}
+    command: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ {{item}}
     with_items:
       - config:system:set trusted_domains 1 --value={{ virtual_host_ip }}
       - config:system:set trusted_domains 2 --value={{ virtual_host }}
@@ -35,7 +35,7 @@
 
   - name: Adding CA certificates
     become: true
-    command: docker exec -d nextcloud-app bash -c "{{item}}"
+    command: docker exec -it nextcloud-app bash -c "{{item}}"
     with_items:
       - cp -f /etc/nginx/certs/*.crt /usr/share/ca-certificates
       - echo 'ca.crt' >> /etc/ca-certificates.conf
