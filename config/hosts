@@ -2,8 +2,10 @@
 localhost
 
 [docker_compose]
-INSTANCES_IPS
+10.0.0.100
 
 [docker_compose:vars]
 ansible_user=ubuntu
 ansible_sudo=yes
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+

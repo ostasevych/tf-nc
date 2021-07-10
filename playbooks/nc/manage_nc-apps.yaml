@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: docker_compose
   gather_facts: false
   vars_files:
   - ../vars/external_vars.yaml
