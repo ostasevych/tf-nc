@@ -9,7 +9,7 @@
 
   - name: Read users
     read_csv:
-      path: csv/users.csv
+      path: "{{ lookup('env','WORKSPACE') }}/csv/users.csv"
     register: users
     delegate_to: localhost
 
