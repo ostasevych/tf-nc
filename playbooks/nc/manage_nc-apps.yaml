@@ -7,11 +7,12 @@
 
   tasks:
 
-  - name: PWD
-    command: echo {{ WORKSPACE }}
-    register: pwd_res
+  - command: echo "{{ lookup('env','PATH') }}"
+    register: default_path
+  - command: echo "{{ lookup('env','WORKSPACE') }}"
+    register: jenkins_job_workspace
   - debug:
-      var: pwd_res.stdout
+      var: default_path.stdout
 
   - name: Read apps
     read_csv:
