@@ -7,6 +7,12 @@
 
   tasks:
 
+  - name: current directory
+    command: pwd
+    register: pwd_res
+  - debug:
+       var: pwd_res.stdout
+
   - name: Read apps
     read_csv:
       path: csv/apps.csv
