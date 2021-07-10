@@ -7,8 +7,6 @@
 
   tasks:
 
-  - command: echo "{{ lookup('env','PATH') }}"
-    register: default_path
   - command: echo "{{ lookup('env','WORKSPACE') }}"
     register: jenkins_job_workspace
   - debug:
@@ -16,7 +14,7 @@
 
   - name: Read apps
     read_csv:
-      path: {{ jenkins_job_workspace }}/csv/apps.csv
+      path: csv/apps.csv
     register: apps
     delegate_to: localhost
 
