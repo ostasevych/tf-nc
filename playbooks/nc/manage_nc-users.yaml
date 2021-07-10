@@ -9,7 +9,7 @@
 
   - name: Read users
     read_csv:
-      path: ~/tf-nc/csv/users.csv
+      path: csv/users.csv
     register: users
     delegate_to: localhost
 
