@@ -24,7 +24,7 @@ files_videoplayer,true,false
 firstrunwizard,false,false
 logreader,true,false
 lookup_server_connector,true,false
-nextcloud_announcements,true,false
+nextcloud_announcements,false,false
 notifications,true,false
 oauth2,true,false
 onlyoffice,true,false

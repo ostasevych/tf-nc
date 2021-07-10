@@ -23,4 +23,5 @@
       - app:install onlyoffice
       - app:enable onlyoffice
       - config:system:set allow_local_remote_servers --value=true
+      - config:app:set onlyoffice DocumentServerUrl --value https://{{ VIRTUAL_HOST }}/index.php/apps/documentserver_community/
     register: enable_cds_onlyoffice
