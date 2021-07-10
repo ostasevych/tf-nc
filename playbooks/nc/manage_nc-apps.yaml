@@ -14,7 +14,7 @@
 
   - name: Read apps
     read_csv:
-      path: "{{jenkins_job_workspace}}"/csv/apps.csv
+      path: {{ lookup('env','WORKSPACE') }}/csv/apps.csv
     register: apps
     delegate_to: localhost
 
