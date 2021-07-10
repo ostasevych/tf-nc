@@ -1,6 +1,6 @@
 AppName,Enabled,Removed
 accessibility,false,false
-activity,false,false
+activity,true,false
 admin_audit,false,false
 calendar,false,false
 circles,false,false
