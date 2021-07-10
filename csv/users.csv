@@ -1,0 +1,4 @@
+UID,GID,DisplayName,Email,Quota,Enabled,Deleted
+john.doe,users,John Doe,john.doe@email.org,none,false,false
+michael.jackson,users,Michael Jackson,michael@jackson.net,1GB,false,false
+jane.parker,users,Jane Parker,jane.parker@mail.net,1GB,true,false

@@ -4,71 +4,52 @@
   vars_files:
   - ../vars/external_vars.yaml
   - ../vars/nc_vars.yaml
-  - ../vars/nc-apps_vars.yaml
 
   tasks:
 
-  - name: Create the list of apps to install
-    set_fact:
-      list_apps_install: "{{ apps_install.split(',') }}"
-    ignore_errors: true
+  - name: Read apps
+    read_csv:
+      path: ~/tf-nc/csv/apps.csv
+    register: apps
+    delegate_to: localhost
 
-  - name: Create the list of apps to remove
-    set_fact:
-      list_apps_remove: "{{ apps_remove.split(',') }}"
-    ignore_errors: true
-
-
-  - name: Create the list of apps to enable
-    set_fact:
-      list_apps_enable: "{{ apps_enable.split(',') }}"
-    ignore_errors: true
-
-
-  - name: Create the list of apps to disable
-    set_fact:
-      list_apps_disable: "{{ apps_disable.split(',') }}"
-    ignore_errors: true
-
-  - name: Install NC apps, but not enable
-
+  - name: Add NC apps
     become: true
-    command: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ app:install --keep-disabled {{ item }}
-    with_items: "{{ list_apps_install }}"
-#    when: (list_apps_install is defined) and (list_apps_install != None) and (list_apps_install != list_apps_remove)
+    command: docker exec -u 33 nextcloud-app {{ APP_PATH }}/occ app:install -f --keep-disabled "{{ app.AppName }}"
+    when: app.Removed == "false"
+    loop: "{{ apps.list }}"
+    loop_control:
+      loop_var: app
     ignore_errors: true
-    register: install_nc_apps
+    register: add_nc_apps
 
-#  - debug: msg="{{ install_nc_apps.stdout }}"
-
-  - name: Enable NC apps
+  - name: Enable apps
     become: true
-    command: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ app:enable {{ item }}
-    with_items: "{{ list_apps_enable }}"
-#    when: (list_apps_enable is defined) and (list_apps_enable != None)
+    command: docker exec -u 33 nextcloud-app {{ APP_PATH }}/occ app:enable -f {{ app.AppName }}
+    when: app.Enabled == "true"
+    loop: "{{ apps.list }}"
+    loop_control:
+      loop_var: app
     ignore_errors: true
     register: enable_nc_apps
 
-#  - debug: msg="{{ enable_nc_apps.stdout }}"
-
-  - name: Disable NC apps
+  - name: Disable apps
     become: true
-    command: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ app:disable {{ item }}
-    with_items: "{{ list_apps_disable }}"
-#    when: (list_apps_disable is defined) and (list_apps_disable != None)
+    command: docker exec -u 33 nextcloud-app {{ APP_PATH }}/occ app:disable {{ app.AppName }}
+    when: app.Enabled == "false"
+    loop: "{{ apps.list }}"
+    loop_control:
+      loop_var: app
     ignore_errors: true
     register: disable_nc_apps
 
-#  - debug: msg="{{ disable_nc_apps.stdout }}"
 
-
-  - name: Remove NC apps
+  - name: Remove apps
     become: true
-    command: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ app:remove {{ item }}
-    with_items: "{{ list_apps_remove }}"
-#    when: (list_apps_remove is defined) and (list_apps_remove != None) and (list_apps_remove != list_apps_install)
-    ignore_errors: true
+    command: docker exec -u 33 nextcloud-app {{ APP_PATH }}/occ app:remove {{ app.AppName }}
+    when: app.Removed == "true"
+    loop: "{{ apps.list }}"
+    loop_control:
+      loop_var: app
+#    ignore_errors: true
     register: remove_nc_apps
-
-
-#  - debug: msg="{{ remove_nc_apps.stdout }}"

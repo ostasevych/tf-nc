@@ -43,3 +43,7 @@
       - update-ca-certificates
     register: install_certs
 
+  - name: Create group users
+    become: true
+    command: docker exec -it -u 33 nextcloud-app {{ APP_PATH }}/occ group:add users
+    register: group_users_add
