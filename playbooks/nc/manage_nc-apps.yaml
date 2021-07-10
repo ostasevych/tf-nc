@@ -8,7 +8,7 @@
   tasks:
 
   - name: current directory
-    command: echo $WORKSPACE
+    command: echo ${env.WORKSPACE}
     register: pwd_res
   - debug:
        var: pwd_res.stdout
