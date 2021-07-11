@@ -1,0 +1,14 @@
+---
+- name: copy private key
+  become: true
+  shell: |
+    cp /home/ubuntu/.ssh/myKey.pem /var/lib/jenkins/.ssh/myKey.pem
+    chown jenkins:jenkins /var/lib/jenkins/.ssh/myKey.pem
+
+- name: importing pre-defined jobs
+  shell: |
+    java -jar /opt/jenkins-cli.jar -s http://localhost:8080 -auth admin:admin create-job job-manage-nc-apps < /home/ubuntu/tf-nc/jenkins/jobs/job-manage-nc-apps/config.xml
+    java -jar /opt/jenkins-cli.jar -s http://localhost:8080 -auth admin:admin create-job job-manage-nc-users < /home/ubuntu/tf-nc/jenkins/jobs/job-manage-nc-users/config.xml
+
+
+  
