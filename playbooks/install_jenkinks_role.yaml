@@ -1,0 +1,11 @@
+- hosts: localhost
+  become: true
+
+  vars:
+    jenkins_hostname: localhost
+    java_packages:
+      - openjdk-8-jdk
+
+  roles:
+#    - role: geerlingguy.java
+    - role: geerlingguy.jenkins
