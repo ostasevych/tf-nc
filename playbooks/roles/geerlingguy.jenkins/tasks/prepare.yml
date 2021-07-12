@@ -1,5 +1,5 @@
 ---
-- name: Copy private key to jenkins .ssh
+- name: Copy private key to jenkins folder
   become: true
   shell: |
     mkdir /var/lib/jenkins/.ssh
@@ -27,7 +27,8 @@
 
 - name: Create credentials.xml file
 # shell: java -jar /opt/jenkins-cli.jar -auth admin:admin -s http://localhost:8080/ create-credentials-by-xml system::system::jenkins _ < {{ credential.stdout }}
-  shell: java -jar /opt/jenkins-cli.jar -auth admin:admin -s http://localhost:8080/ create-credentials-by-xml system::system::jenkins _ < /tmp/cred.xml
+  shell: |
+    java -jar /opt/jenkins-cli.jar -s http://localhost:8080/ -auth admin:admin create-credentials-by-xml system::system::jenkins _ < /tmp/cred.xml
   ignore_errors: true
 
 - name: Remove temp file cred.xml
@@ -36,7 +37,7 @@
     state: absent
 
 
-- name: importing pre-defined jobs
+- name: Import pre-defined jobs
   shell: |
     java -jar /opt/jenkins-cli.jar -s http://localhost:8080 -auth admin:admin create-job job-manage-nc-apps < /home/ubuntu/tf-nc/jenkins/jobs/job-manage-nc-apps/config.xml
     java -jar /opt/jenkins-cli.jar -s http://localhost:8080 -auth admin:admin create-job job-manage-nc-users < /home/ubuntu/tf-nc/jenkins/jobs/job-manage-nc-users/config.xml
