@@ -1,19 +1,17 @@
 ---
 - hosts: localhost
+  connection: local
   vars_files:
   - vars/external_vars.yaml
 
   tasks:
-
-  - name: install community.general collection
-    command: ansible-galaxy collection install community.general
 
   - name: Add a new deploy key to a GitHub repository, replace an existing key, use an OAuth2 token to authenticate
     community.general.github_deploy_key:
       owner: "ostasevych"
       repository: "tf-nc"
       name: "new-deploy-key"
-      key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+      key: "{{ lookup('file', '/.ssh/id_rsa.pub') }}"
       force: yes
       token: "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"
 
