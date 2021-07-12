@@ -25,12 +25,6 @@ resource "local_file" "public_key" {
     }
 }
 
-#resource "aws_key_pair" "my-key-pair" {
-#  key_name   = "my-key-pair"
-##  public_key = "${file(pathexpand(var.public_key))}"
-#  public_key = "${file(var.PUBLIC_KEY_PATH)}"
-#}
-
 resource "aws_vpc" "my-vpc" {
   cidr_block           = "10.0.0.0/16" # Defines overall VPC address space
   enable_dns_hostnames = true          # Enable DNS hostnames for this VPC
@@ -226,7 +220,7 @@ resource "aws_s3_bucket" "nc-bucket-data" {
 })
 }
 
-# s3 block all public access to bucket
+# S3 block all public access to bucket
 resource "aws_s3_bucket_public_access_block" "nc-bucket-pubaccessblock-data" {
   bucket                  = aws_s3_bucket.nc-bucket-data.id
   block_public_acls       = true
@@ -245,14 +239,9 @@ resource "aws_instance" "docker-compose" {
   subnet_id = "${aws_subnet.my-subnet-1.id}"
 
 # the Public SSH key
-key_name      = aws_key_pair.generated_key.key_name
-#  key_name = "${aws_key_pair.my-key-pair.id}"
-#  key_name      = "terraform"
+  key_name      = aws_key_pair.generated_key.key_name
 
 # Defining private IP
-#  private_ip	= "172.31.32.101"
-#  private_ip = "${aws_subnet.my-subnet-1.private_ip}"
-#   private_ip = "10.0.1.2"
   private_ip = "${lookup(var.private_ips,count.index)}"
 
 
@@ -284,10 +273,6 @@ key_name      = aws_key_pair.generated_key.key_name
      timeout     = "2m"
   }
 
-#  provisioner "file" {
-#    source = var.PRIVATE_KEY_PATH
-#    destination = "~/.ssh/${var.PRIVATE_KEY_PATH}"
-#   }
 
 # Adding public key to the docker-compose VM
 
@@ -361,7 +346,7 @@ resource "aws_instance" "terraform-ci" {
    }
 
 
-# Installing ansible on remote machine
+# Preparing remote machines
 # Ansible requires Python to be installed on the remote machine as well as the local machine.
   
   provisioner "remote-exec" {
@@ -373,27 +358,16 @@ resource "aws_instance" "terraform-ci" {
 	      "sudo apt install python3 -y",
 	      "sudo apt install python3-pip -y",
 	      "sudo apt install git -y",
-##	      "sudo apt update && sudo apt upgrade -y",
               "sudo pip install pygithub",
 	      "sudo apt install ansible -y",
-#	      "sudo pip install --upgrade pip",
-#	      "sudo pip install --upgrade ansible",
 	      "if [ $? -eq 0 ]; then echo \"Installed ansible, running in `pwd`\"; else echo \"Failed to install ansible\"; fi",
 
 	      "ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa",
 	      "if [ $? -eq 0 ]; then echo \"Generated ssh keys pair\"; else echo \"Failed to generate ssh keys pair\"; fi",
 
 	      "eval \"$(ssh-agent -s)\"",
-#	      "ssh-add ~/.ssh/id_rsa",
-#	      "ssh-add ./myKey.pem",
-
-#	      "cat \"${tls_private_key.t.private_key_pem}\"",
-#	      "ssh-add \"${tls_private_key.t.private_key_pem}\"",
 	      "ssh-add ~/.ssh/${var.PRIVATE_KEY_PATH}",
 	      "echo \"Added SSH key to the ssh-agent\"",
-
-#	      "ssh -T git@github.com"
-#	      "echo \"Testing SSH connection with GitHub\"",
 
 	      "git clone https://github.com/ostasevych/tf-nc.git",
 	      "if [ $? -eq 0 ]; then echo \"Successfully cloned git with the configuration\"; else echo \"Failed to clone git\"; fi",
@@ -416,11 +390,11 @@ resource "aws_instance" "terraform-ci" {
 	      "echo \"aws_secret: ${var.secret}\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
 	      "if [ $? -eq 0 ]; then echo \"Public host name and S3 variables have been successfully sent to external_vars.yaml\"; else echo \"Failed to store virtual_host and S3 variables at external_vars.yaml \"; fi",
 
-	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/install_java.yaml",
-	      "if [ $? -eq 0 ]; then echo \"Java OpenJDK installed successfully\"; else echo \"Failed to install Java OpenJDK\"; fi",
-
-	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/install_jenkins_role.yaml",
+	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/install_jenkins.yaml",
 	      "if [ $? -eq 0 ]; then echo \"Successfully installed Jenkins, available at http://${self.public_ip}:8080\"; else echo \"Failed to install and/or run Jenkins\"; fi",
+
+	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/init_jenkins.yaml",
+	      "if [ $? -eq 0 ]; then echo \"Successfully added jobs to Jenkins\"; else echo \"Failed to add jobs to Jenkins\"; fi",
 
 	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/install_docker-compose.yaml",
 	      "if [ $? -eq 0 ]; then echo \"Successfully installed docker-compose at ${aws_instance.docker-compose.0.private_ip}\"; else echo \"Failed to install docker-compose at ${aws_instance.docker-compose.0.private_ip}\"; fi",
@@ -440,12 +414,8 @@ resource "aws_instance" "terraform-ci" {
 	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/install_nc-cds.yaml",
 	      "if [ $? -eq 0 ]; then echo \"Successfully installed OnlyOffice Community Document Server!\"; else echo \"Failed to install OnlyOffice Community Document Server\"; fi",
 
-	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/nc/manage_nc-apps.yaml",
-	      "if [ $? -eq 0 ]; then echo \"Successfully updated apps status according to the list!\"; else echo \"Failed to update the status of apps\"; fi",
-
-	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/nc/manage_nc-users.yaml",
-	      "if [ $? -eq 0 ]; then echo \"Successfully updated list of users according to the list!\"; else echo \"Failed to update the list of users\"; fi",
-
+	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/run_jobs_once.yaml",
+	      "if [ $? -eq 0 ]; then echo \"Successfully updated apps and users status according to the lists!\"; else echo \"Failed to run jobs.\"; fi",
 
 ]
   }
