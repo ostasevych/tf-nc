@@ -371,10 +371,13 @@ resource "aws_instance" "terraform-ci" {
     inline = [
 	      "chmod 400 ~/.ssh/${var.PRIVATE_KEY_PATH}",
 	      "sudo apt update && sudo apt upgrade -y",
+	      "sudo apt update && sudo apt upgrade -y",
+              "sleep 0.5",
 	      "sudo apt install python3 -y",
 	      "sudo apt install python3-pip -y",
 	      "sudo apt install git -y",
-	      "sudo apt update && sudo apt upgrade -y",
+##	      "sudo apt update && sudo apt upgrade -y",
+              "sudo apt install pygithub -y",
 	      "sudo apt install ansible -y",
 #	      "sudo pip install --upgrade pip",
 #	      "sudo pip install --upgrade ansible",
@@ -398,12 +401,17 @@ resource "aws_instance" "terraform-ci" {
 	      "git clone https://github.com/ostasevych/tf-nc.git",
 	      "if [ $? -eq 0 ]; then echo \"Successfully cloned git with the configuration\"; else echo \"Failed to clone git\"; fi",
 
-	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.terraform-ci.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/github_integration.yaml",
+	      "ansible-galaxy collection install community.general",
+	      "if [ $? -eq 0 ]; then echo \"Successfully installed ansible-galaxy collection community.general\"; else echo \"Failed to install ansible-galaxy collection community.general\"; fi",
+
+	      "echo \"jenkins_host_ip: ${aws_instance.terraform-ci.0.public_dns}\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
+	      "echo \"token: ${var.github_token}\" >> ~/tf-nc/playbooks/vars/github_vars.yaml",
+	      "echo \"virtual_host: ${aws_instance.docker-compose.0.public_dns}\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
+	      "echo \"virtual_host_ip: ${aws_instance.docker-compose.0.public_ip}\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
+
+	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/github_integration.yaml",
 	      "if [ $? -eq 0 ]; then echo \"Successfully added pub key and webhook at github repository\"; else echo \"Failed to add pub key and webhook to the github repository\"; fi",
 
-	      "echo \"virtual_host: ${aws_instance.docker-compose.0.public_dns}\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
-	      "echo \"jenkins_host_ip: ${aws_instance.terraform-ci.0.public_dns}\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
-	      "echo \"virtual_host_ip: ${aws_instance.docker-compose.0.public_ip}\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
 	      "echo \"aws_host: s3.${var.region}.amazonaws.com\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
 	      "echo \"aws_bucket: ${var.name_prefix}-nc-data\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
 	      "echo \"aws_region: ${var.region}\" >> ~/tf-nc/playbooks/vars/external_vars.yaml",
