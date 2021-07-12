@@ -2,7 +2,7 @@ AppName,Enabled,Removed
 accessibility,false,false
 activity,true,false
 admin_audit,false,false
-calendar,false,false
+calendar,true,false
 circles,false,false
 cloud_federation_api,true,false
 comments,true,false
