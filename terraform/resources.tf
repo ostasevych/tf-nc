@@ -353,9 +353,6 @@ resource "aws_instance" "terraform-ci" {
   }
 
 
-  #user_data = "${file("../templates/install_jenkins.sh")}"
-  #user_data = "${file("../templates/install_ansible.sh")}"
-
 # Sending private key to the VM
 
   provisioner "file" {
@@ -377,7 +374,7 @@ resource "aws_instance" "terraform-ci" {
 	      "sudo apt install python3-pip -y",
 	      "sudo apt install git -y",
 ##	      "sudo apt update && sudo apt upgrade -y",
-              "sudo apt install pygithub -y",
+              "sudo pip install pygithub",
 	      "sudo apt install ansible -y",
 #	      "sudo pip install --upgrade pip",
 #	      "sudo pip install --upgrade ansible",
@@ -422,8 +419,8 @@ resource "aws_instance" "terraform-ci" {
 	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/install_java.yaml",
 	      "if [ $? -eq 0 ]; then echo \"Java OpenJDK installed successfully\"; else echo \"Failed to install Java OpenJDK\"; fi",
 
-#	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/install_jenkins_role.yaml",
-#	      "if [ $? -eq 0 ]; then echo \"Successfully installed Jenkins, available at http://${self.public_ip}:8080\"; else echo \"Failed to install and/or run Jenkins\"; fi",
+	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook ~/tf-nc/playbooks/install_jenkins_role.yaml",
+	      "if [ $? -eq 0 ]; then echo \"Successfully installed Jenkins, available at http://${self.public_ip}:8080\"; else echo \"Failed to install and/or run Jenkins\"; fi",
 
 	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/install_docker-compose.yaml",
 	      "if [ $? -eq 0 ]; then echo \"Successfully installed docker-compose at ${aws_instance.docker-compose.0.private_ip}\"; else echo \"Failed to install docker-compose at ${aws_instance.docker-compose.0.private_ip}\"; fi",
