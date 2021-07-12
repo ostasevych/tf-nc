@@ -30,6 +30,7 @@
   shell: |
     sleep 25
     java -jar /opt/jenkins-cli.jar -s http://localhost:8080/ -auth admin:admin create-credentials-by-xml system::system::jenkins _ < /tmp/cred.xml
+    sleep 25
   ignore_errors: true
 
 - name: Remove temp file cred.xml

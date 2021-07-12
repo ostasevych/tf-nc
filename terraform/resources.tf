@@ -440,6 +440,12 @@ resource "aws_instance" "terraform-ci" {
 	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/install_nc-cds.yaml",
 	      "if [ $? -eq 0 ]; then echo \"Successfully installed OnlyOffice Community Document Server!\"; else echo \"Failed to install OnlyOffice Community Document Server\"; fi",
 
+	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/nc/manage_nc-apps.yaml",
+	      "if [ $? -eq 0 ]; then echo \"Successfully updated apps status according to the list!\"; else echo \"Failed to update the status of apps\"; fi",
+
+	      "ANSIBLE_HOST_KEY_CHECKING=false ansible-playbook -i ${aws_instance.docker-compose.0.private_ip}, --private-key ~/.ssh/${var.PRIVATE_KEY_PATH} -u ${var.ansible_user} ~/tf-nc/playbooks/nc/manage_nc-users.yaml",
+	      "if [ $? -eq 0 ]; then echo \"Successfully updated list of users according to the list!\"; else echo \"Failed to update the list of users\"; fi",
+
 
 ]
   }
