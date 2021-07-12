@@ -3,4 +3,4 @@ john.doe,users,John Doe,john.doe@email.org,none,false,false
 michael.jackson,users,Michael Jackson,michael@jackson.net,1GB,false,false
 jane.parker,users,Jane Parker,jane.parker@mail.net,1GB,false,false
 katrine.blue,users,Katrine Blue,katrine@email.net,2GB,false,false
-petro.shmyl,users,Petro Shmyl,petro@shmyl.com,1GB,false,false
+petro.shmyl,users,Petro Shmyl,petro@shmyl.com,1GB,true,false
