@@ -1,10 +1,40 @@
 ---
-- name: copy private key
+- name: Copy private key to jenkins .ssh
   become: true
   shell: |
     mkdir /var/lib/jenkins/.ssh
     cp /home/ubuntu/.ssh/myKey.pem /var/lib/jenkins/.ssh/myKey.pem
     chown -R jenkins:jenkins /var/lib/jenkins/.ssh/
+
+- name: Create input for xml file
+  become: true
+  shell: |
+    echo "<com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey plugin=\"ssh-credentials@1.13\">
+      <scope>GLOBAL</scope>
+      <id>github-ssh-key-new</id>
+      <description>github-ssh-key-new</description>
+      <username>ostasevych</username>
+      <privateKeySource class=\"com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey\$DirectEntryPrivateKeySource\">
+        <privateKey>`cat /home/ubuntu/.ssh/id_rsa`</privateKey>
+      </privateKeySource>
+      </com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey>"
+  register: credential
+
+- name: Copy credential to a temp file
+  copy:
+    content: "{{ credential.stdout }}"
+    dest: /tmp/cred.xml
+
+- name: Create credentials.xml file
+# shell: java -jar /opt/jenkins-cli.jar -auth admin:admin -s http://localhost:8080/ create-credentials-by-xml system::system::jenkins _ < {{ credential.stdout }}
+  shell: java -jar /opt/jenkins-cli.jar -auth admin:admin -s http://localhost:8080/ create-credentials-by-xml system::system::jenkins _ < /tmp/cred.xml
+  ignore_errors: true
+
+- name: Remove temp file cred.xml
+  file:
+    path: "/tmp/cred.xml"
+    state: absent
+
 
 - name: importing pre-defined jobs
   shell: |
