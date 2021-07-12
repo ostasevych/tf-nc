@@ -22,6 +22,10 @@ variable "secret" {
   default = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 }
 
+variable "github_token" {
+  default = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+}
+
 variable "instance" {
   default = "t2.micro"
 }

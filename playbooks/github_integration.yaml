@@ -3,6 +3,7 @@
   connection: local
   vars_files:
   - vars/external_vars.yaml
+  - vars/github_vars.yaml
 
   tasks:
 
@@ -11,20 +12,13 @@
       owner: "ostasevych"
       repository: "tf-nc"
       name: "new-deploy-key"
-      key: "{{ lookup('file', '/.ssh/id_rsa.pub') }}"
+      key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
       force: yes
-      token: "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"
+      token: "{{ token }}"
 
   - name: testing SSH connection with GitHib
-    command: ssh -T git@github.com
+    command: ssh -T -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null git@github.com
     ignore_errors: true
-#    register: github_test
-
-#  - debug:
-#      var: github_test.stdout
-
-  - name: install PyGithub
-    command: pip3 install pygithub
 
   - name:  create a new webhook that triggers on push (password auth)
     community.general.github_webhook:
@@ -33,4 +27,4 @@
       events:
         - push
       user: "ostasevych"
-      token: "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"
+      token: "{{ token }}"
