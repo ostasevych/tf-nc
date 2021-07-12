@@ -29,6 +29,7 @@
 # shell: java -jar /opt/jenkins-cli.jar -auth admin:admin -s http://localhost:8080/ create-credentials-by-xml system::system::jenkins _ < {{ credential.stdout }}
   shell: |
     java -jar /opt/jenkins-cli.jar -s http://localhost:8080/ -auth admin:admin create-credentials-by-xml system::system::jenkins _ < /tmp/cred.xml
+    sleep 20
   ignore_errors: true
 
 - name: Remove temp file cred.xml
