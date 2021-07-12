@@ -7,6 +7,5 @@
       - openjdk-8-jdk
 
   roles:
-#    - role: geerlingguy.java
+    - role: geerlingguy.java
     - role: geerlingguy.jenkins
-#    - role: setup_jobs.jenkins

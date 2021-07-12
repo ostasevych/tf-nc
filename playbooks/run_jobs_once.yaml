@@ -1,0 +1,8 @@
+---
+- hosts: localhost
+  tasks:
+
+  - name: Run jobs once
+    shell: |
+      java -jar /opt/jenkins-cli.jar -s http://localhost:8080/ -auth admin:admin build job-manage-nc-apps -w
+      java -jar /opt/jenkins-cli.jar -s http://localhost:8080/ -auth admin:admin build job-manage-nc-users -w
