@@ -44,10 +44,10 @@ Anybody may use, modify and share this code freely.
 ## Credits
 
 In this project I used partially the data from the following repositories:
-- ![Ansible Role: Jenkins CI](https://github.com/geerlingguy/ansible-role-jenkins)
-- !Self-signed certificate companion for Nginx-Proxy[https://github.com/sebastienheyd/docker-self-signed-proxy-companion]
+- [Ansible Role: Jenkins CI](https://github.com/geerlingguy/ansible-role-jenkins)
+- [Self-signed certificate companion for Nginx-Proxy](https://github.com/sebastienheyd/docker-self-signed-proxy-companion)
 
 Special thanks to the authors of these articles:
-- !Nextcloud: running in Docker Compose on Debian with Let’s Encrypt SSL[https://rtfm.co.ua/en/nextcloud-running-in-docker-compose-on-debian-with-lets-encrypt-ssl/?utm_source=pocket_mylist]
-- !Terraform | Create a VPC, subnets and more…[https://medium.com/@aliatakan/terraform-create-a-vpc-subnets-and-more-6ef43f0bf4c1]
+- [Nextcloud: running in Docker Compose on Debian with Let’s Encrypt SSL](https://rtfm.co.ua/en/nextcloud-running-in-docker-compose-on-debian-with-lets-encrypt-ssl/?utm_source=pocket_mylist)
+- [Terraform | Create a VPC, subnets and more…](https://medium.com/@aliatakan/terraform-create-a-vpc-subnets-and-more-6ef43f0bf4c1)
 
