@@ -1,7 +1,7 @@
 # tf-nc
 A learning project to study CI/CI by building the cloud office for a small organisation.
 
-The process includes:
+## The process includes:
 - creation of two EC2 instances: terraform-ci and docker-compose;
 - generation of private key;
 - adding security groups to instances (22; 8080; 80 and 443 ports).
@@ -18,7 +18,7 @@ The process includes:
 - performing first run of jobs to update users and apps (optional);
 - providing output with URLs of Jenkins and Web application.
 
-ToDo:
+##ToDo:
 - Get rid of hard code.
 - Place maximum provisioning from terraform to ansible playbooks.
 - Transform sole ansible playbooks to the structured ansible roles.
@@ -29,4 +29,16 @@ ToDo:
 - To add cleaning orphan keys in GitHub.
 - Add own domain name and enable Let’s Encrypt certificate.
 - To think about adding other targets apart of AWS.
+
+##Disclaimer:
+This is an educational project solely intended to present an example how the CI/CD logic may be implemented. While preparing this project I have intentionally used different solutions to show how it is possible to achieve the objective. 
+
+For the learning goals the setup and provisioning data are stored in one GitHub repository, the S3 bucket is not persistent.
+
+The project is recommended to use **only** for learning purposes.
+
+There’s a lot to improve and clean the code.
+
+Anybody may use, modify and share this code freely.
+
 
