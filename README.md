@@ -1,5 +1,5 @@
 # tf-nc
-Building the cloud office for a small organisation.
+A learning project to study CI/CI by building the cloud office for a small organisation.
 
 The process includes:
 - creation of two EC2 instances: terraform-ci and docker-compose;
@@ -17,3 +17,16 @@ The process includes:
 - installing OnlyOffice Community Document Server (optional); 
 - performing first run of jobs to update users and apps (optional);
 - providing output with URLs of Jenkins and Web application.
+
+ToDo:
+Get rid of hard code.
+Place maximum provisioning from terraform to ansible playbooks.
+Transform sole ansible playbooks to the structured ansible roles.
+Get rid of docker-compose, but use ansible.
+To make configuration OS dependant where possible.
+To collect all variables in one configuration file.
+To rethink completely the authentication mechanisms and managing credentials, add aws_vault where possible.
+To add cleaning orphan keys in GitHub.
+Add own domain name and enable Let’s Encrypt certificate.
+To think about adding other targets apart of AWS.
+
