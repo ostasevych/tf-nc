@@ -44,7 +44,7 @@ Anybody may use, modify and share this code freely.
 ## Credits
 
 In this project I used partially the data from the following repositories:
-- !Ansible Role: Jenkins CI[https://github.com/geerlingguy/ansible-role-jenkins]
+- ![Ansible Role: Jenkins CI](https://github.com/geerlingguy/ansible-role-jenkins)
 - !Self-signed certificate companion for Nginx-Proxy[https://github.com/sebastienheyd/docker-self-signed-proxy-companion]
 
 Special thanks to the authors of these articles:
