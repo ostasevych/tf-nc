@@ -18,7 +18,7 @@ A learning project to study CI/CI by building the cloud office for a small organ
 - performing first run of jobs to update users and apps (optional);
 - providing output with URLs of Jenkins and Web application.
 
-##ToDo:
+## ToDo:
 - Get rid of hard code.
 - Place maximum provisioning from terraform to ansible playbooks.
 - Transform sole ansible playbooks to the structured ansible roles.
@@ -30,7 +30,7 @@ A learning project to study CI/CI by building the cloud office for a small organ
 - Add own domain name and enable Let’s Encrypt certificate.
 - To think about adding other targets apart of AWS.
 
-##Disclaimer:
+## Disclaimer:
 This is an educational project solely intended to present an example how the CI/CD logic may be implemented. While preparing this project I have intentionally used different solutions to show how it is possible to achieve the objective. 
 
 For the learning goals the setup and provisioning data are stored in one GitHub repository, the S3 bucket is not persistent.
