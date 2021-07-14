@@ -21,13 +21,13 @@ A learning project to study CI/CI by building the cloud office for a small organ
 ## ToDo:
 - Get rid of hard code.
 - Place maximum provisioning from terraform to ansible playbooks.
-- Transform sole ansible playbooks to the structured ansible roles.
-- Get rid of docker-compose, but use ansible.
-- To make configuration OS dependant where possible.
 - To collect all variables in one configuration file.
-- To rethink completely the authentication mechanisms and managing credentials, add aws_vault where possible.
-- To add cleaning orphan keys in GitHub.
-- Add own domain name and enable Let’s Encrypt certificate.
+- Add the configuration of own domain name, and enable Let’s Encrypt certificate.
+- Transform sole ansible playbooks to the structured ansible roles.
+- Get rid of docker-compose, and use pure ansible with dockers.
+- To make configuration OS dependant where possible.
+- To add testing procedures
+- To rethink the authentication mechanisms and managing credentials, add aws_vault and ansible-vault where possible.
 - To think about adding other targets apart of AWS.
 
 ## Disclaimer:
