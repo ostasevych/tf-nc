@@ -9,7 +9,7 @@ comments,true,false
 contactsinteraction,true,false
 dashboard,false,false
 dav,true,false
-documentserver_community,false,false
+documentserver_community,true,false
 encryption,false,false
 federatedfilesharing,true,false
 federation,false,false
