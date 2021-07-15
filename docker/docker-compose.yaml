@@ -43,7 +43,7 @@ services:
       - /data/nextcloud/nginx/certs:/etc/nginx/certs
 
   mysql:
-    image: mariadb
+    image: mariadb:10.5
     container_name: nextcloud-mysql
     networks:
       - nextcloud_network
